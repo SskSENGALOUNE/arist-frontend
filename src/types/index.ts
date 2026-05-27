@@ -1,3 +1,38 @@
+export type Gender = "MALE" | "FEMALE" | "OTHER";
+export type LanguageLevel =
+  | "NONE"
+  | "BASIC"
+  | "INTERMEDIATE"
+  | "ADVANCED"
+  | "NATIVE";
+export type EducationLevel =
+  | "HIGH_SCHOOL"
+  | "VOCATIONAL"
+  | "DIPLOMA"
+  | "BACHELOR"
+  | "MASTER"
+  | "PHD";
+export type GraduatedFrom = "DOMESTIC" | "ABROAD";
+export type Country =
+  | "LAOS"
+  | "THAILAND"
+  | "VIETNAM"
+  | "CHINA"
+  | "CAMBODIA"
+  | "MYANMAR"
+  | "MALAYSIA"
+  | "SINGAPORE"
+  | "JAPAN"
+  | "SOUTH_KOREA"
+  | "USA"
+  | "UK"
+  | "AUSTRALIA"
+  | "FRANCE"
+  | "GERMANY"
+  | "RUSSIA"
+  | "CANADA"
+  | "OTHER";
+
 export interface User {
   id: string;
   username: string;

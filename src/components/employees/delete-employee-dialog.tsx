@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import type { EmployeeUser } from "@/services/employee";
+import { useT } from "@/lib/i18n";
 
 interface DeleteEmployeeDialogProps {
   open: boolean;
@@ -25,6 +26,7 @@ export function DeleteEmployeeDialog({
   employee,
   onConfirm,
 }: DeleteEmployeeDialogProps) {
+  const t = useT();
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleDelete = async () => {
@@ -37,17 +39,17 @@ export function DeleteEmployeeDialog({
     }
   };
 
+  const name = employee
+    ? `${employee.firstName} ${employee.lastName}`.trim()
+    : "";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
-          <DialogTitle>Delete Employee</DialogTitle>
+          <DialogTitle>{t.deleteDialog.title}</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete{" "}
-            <span className="font-medium text-foreground">
-              {employee?.firstName} {employee?.lastName}
-            </span>
-            ? This action cannot be undone.
+            {t.deleteDialog.description(name)}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
@@ -56,14 +58,14 @@ export function DeleteEmployeeDialog({
             variant="outline"
             onClick={() => onOpenChange(false)}
           >
-            Cancel
+            {t.common.cancel}
           </Button>
           <Button
             variant="destructive"
             onClick={handleDelete}
             disabled={isDeleting}
           >
-            {isDeleting ? "Deleting..." : "Delete"}
+            {isDeleting ? t.common.deleting : t.common.delete}
           </Button>
         </DialogFooter>
       </DialogContent>

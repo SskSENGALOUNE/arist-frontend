@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { employeeService } from "@/services/employee";
 import { useAuthStore } from "@/stores/auth";
+import { useT } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -32,6 +33,7 @@ function formatDate(iso: string) {
 
 export default function AdminDashboardPage() {
   const user = useAuthStore((s) => s.user);
+  const t = useT();
 
   const allQuery = useQuery({
     queryKey: ["dashboard", "all"],
@@ -57,28 +59,28 @@ export default function AdminDashboardPage() {
 
   const stats = [
     {
-      label: "Total Employees",
+      label: t.dashboard.totalEmployees,
       value: total,
       icon: Users,
-      hint: "All users in system",
+      hint: t.dashboard.totalEmployeesHint,
     },
     {
-      label: "Active",
+      label: t.dashboard.active,
       value: active,
       icon: UserCheck,
-      hint: "Currently enabled",
+      hint: t.dashboard.activeHint,
     },
     {
-      label: "Inactive",
+      label: t.dashboard.inactive,
       value: inactive,
       icon: UserX,
-      hint: "Disabled accounts",
+      hint: t.dashboard.inactiveHint,
     },
     {
-      label: "Administrators",
+      label: t.dashboard.administrators,
       value: admins,
       icon: ShieldCheck,
-      hint: "Users with ADMIN role",
+      hint: t.dashboard.administratorsHint,
     },
   ];
 
@@ -86,11 +88,9 @@ export default function AdminDashboardPage() {
     <div className="flex flex-1 flex-col gap-6 p-6">
       <div className="flex flex-col gap-1">
         <h2 className="text-2xl font-semibold tracking-tight">
-          Welcome back{user ? `, ${user.firstName}` : ""}
+          {t.dashboard.welcomeBack(user?.firstName)}
         </h2>
-        <p className="text-sm text-muted-foreground">
-          Here&apos;s an overview of your workforce.
-        </p>
+        <p className="text-sm text-muted-foreground">{t.dashboard.overview}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -119,15 +119,18 @@ export default function AdminDashboardPage() {
       <Card>
         <CardHeader className="flex-row items-center justify-between border-b pb-4">
           <div>
-            <CardTitle>Recent employees</CardTitle>
-            <CardDescription>The latest accounts created.</CardDescription>
+            <CardTitle>{t.dashboard.recentEmployees}</CardTitle>
+            <CardDescription>
+              {t.dashboard.recentEmployeesDescription}
+            </CardDescription>
           </div>
           <Button
             variant="outline"
             size="sm"
+            nativeButton={false}
             render={<Link href="/admin/employees" />}
           >
-            View all
+            {t.dashboard.viewAll}
             <ArrowRight className="size-3.5" />
           </Button>
         </CardHeader>
@@ -140,7 +143,7 @@ export default function AdminDashboardPage() {
             </div>
           ) : !recentQuery.data?.items.length ? (
             <p className="px-4 py-8 text-center text-sm text-muted-foreground">
-              No employees yet.
+              {t.dashboard.noEmployees}
             </p>
           ) : (
             <ul className="divide-y">

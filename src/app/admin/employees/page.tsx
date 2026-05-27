@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Search,
@@ -9,13 +10,16 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
+  Eye,
+  KeyRound,
 } from "lucide-react";
 import {
   employeeService,
   type EmployeeUser,
   type ListUsersParams,
 } from "@/services/employee";
-import { Button } from "@/components/ui/button";
+import { useT } from "@/lib/i18n";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -28,9 +32,11 @@ import {
 } from "@/components/ui/table";
 import { EmployeeFormDialog } from "@/components/employees/employee-form-dialog";
 import { DeleteEmployeeDialog } from "@/components/employees/delete-employee-dialog";
+import { ResetPasswordDialog } from "@/components/employees/reset-password-dialog";
 
 export default function EmployeesPage() {
   const queryClient = useQueryClient();
+  const t = useT();
 
   const [params, setParams] = useState<ListUsersParams>({
     page: 1,
@@ -46,6 +52,9 @@ export default function EmployeesPage() {
   );
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletingEmployee, setDeletingEmployee] =
+    useState<EmployeeUser | null>(null);
+  const [resetOpen, setResetOpen] = useState(false);
+  const [resettingEmployee, setResettingEmployee] =
     useState<EmployeeUser | null>(null);
 
   const { data, isLoading } = useQuery({
@@ -66,6 +75,12 @@ export default function EmployeesPage() {
 
   const deleteMutation = useMutation({
     mutationFn: employeeService.delete,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["employees"] }),
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: ({ id, newPassword }: { id: string; newPassword: string }) =>
+      employeeService.resetPassword(id, newPassword),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["employees"] }),
   });
 
@@ -92,6 +107,15 @@ export default function EmployeesPage() {
     }
   };
 
+  const handleResetPassword = async (newPassword: string) => {
+    if (resettingEmployee) {
+      await resetPasswordMutation.mutateAsync({
+        id: resettingEmployee.id,
+        newPassword,
+      });
+    }
+  };
+
   const pagination = data?.pagination;
 
   return (
@@ -102,7 +126,7 @@ export default function EmployeesPage() {
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search by name, email..."
+                placeholder={t.employees.searchPlaceholder}
                 className="w-64 pl-8"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -110,7 +134,7 @@ export default function EmployeesPage() {
               />
             </div>
             <Button variant="outline" size="sm" onClick={handleSearch}>
-              Search
+              {t.common.search}
             </Button>
           </div>
           <Button
@@ -121,7 +145,7 @@ export default function EmployeesPage() {
             }}
           >
             <Plus className="size-4" />
-            Add Employee
+            {t.employees.addEmployee}
           </Button>
         </div>
 
@@ -129,32 +153,37 @@ export default function EmployeesPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Username</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t.employees.name}</TableHead>
+                <TableHead>{t.employees.username}</TableHead>
+                <TableHead>{t.employees.email}</TableHead>
+                <TableHead>{t.employees.role}</TableHead>
+                <TableHead>{t.employees.status}</TableHead>
+                <TableHead className="text-right">{t.common.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    Loading...
+                    {t.common.loading}
                   </TableCell>
                 </TableRow>
               ) : !data?.items.length ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                    No employees found.
+                    {t.employees.noEmployees}
                   </TableCell>
                 </TableRow>
               ) : (
                 data.items.map((emp) => (
                   <TableRow key={emp.id}>
                     <TableCell className="font-medium">
-                      {emp.firstName} {emp.lastName}
+                      <Link
+                        href={`/admin/employees/${emp.id}`}
+                        className="hover:underline"
+                      >
+                        {emp.firstName} {emp.lastName}
+                      </Link>
                     </TableCell>
                     <TableCell>{emp.username}</TableCell>
                     <TableCell>{emp.email}</TableCell>
@@ -169,14 +198,27 @@ export default function EmployeesPage() {
                       <Badge
                         variant={emp.isActive ? "outline" : "destructive"}
                       >
-                        {emp.isActive ? "Active" : "Inactive"}
+                        {emp.isActive
+                          ? t.employees.statusActive
+                          : t.employees.statusInactive}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
+                        <Link
+                          href={`/admin/employees/${emp.id}`}
+                          className={buttonVariants({
+                            variant: "ghost",
+                            size: "icon-xs",
+                          })}
+                          title={t.common.view}
+                        >
+                          <Eye className="size-3.5" />
+                        </Link>
                         <Button
                           variant="ghost"
                           size="icon-xs"
+                          title={t.common.edit}
                           onClick={() => {
                             setEditingEmployee(emp);
                             setFormOpen(true);
@@ -187,6 +229,18 @@ export default function EmployeesPage() {
                         <Button
                           variant="ghost"
                           size="icon-xs"
+                          title={t.common.resetPassword}
+                          onClick={() => {
+                            setResettingEmployee(emp);
+                            setResetOpen(true);
+                          }}
+                        >
+                          <KeyRound className="size-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          title={t.common.delete}
                           onClick={() => {
                             setDeletingEmployee(emp);
                             setDeleteOpen(true);
@@ -205,7 +259,11 @@ export default function EmployeesPage() {
           {pagination && pagination.totalPages > 1 && (
             <div className="flex items-center justify-between border-t px-4 py-3">
               <p className="text-sm text-muted-foreground">
-                Page {pagination.page} of {pagination.totalPages} ({pagination.total} total)
+                {t.employees.pageInfo(
+                  pagination.page,
+                  pagination.totalPages,
+                  pagination.total,
+                )}
               </p>
               <div className="flex items-center gap-1">
                 <Button
@@ -246,6 +304,13 @@ export default function EmployeesPage() {
         onOpenChange={setDeleteOpen}
         employee={deletingEmployee}
         onConfirm={handleDelete}
+      />
+
+      <ResetPasswordDialog
+        open={resetOpen}
+        onOpenChange={setResetOpen}
+        employee={resettingEmployee}
+        onConfirm={handleResetPassword}
       />
     </div>
   );

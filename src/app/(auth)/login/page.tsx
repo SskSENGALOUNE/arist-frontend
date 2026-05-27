@@ -8,13 +8,13 @@ import { z } from "zod";
 import { Eye, EyeOff } from "lucide-react";
 import { authService } from "@/services/auth";
 import { useAuthStore } from "@/stores/auth";
+import { useT } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
-const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(1, "Password is required"),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
+type LoginFormValues = {
+  username: string;
+  password: string;
+};
 
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap');
@@ -297,25 +297,46 @@ const css = `
 
 export default function LoginPage() {
   const router = useRouter();
+  const t = useT();
   const setAuth = useAuthStore((s) => s.setAuth);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const loginSchema = z.object({
+    username: z.string().min(1, t.auth.usernameRequired),
+    password: z.string().min(1, t.auth.passwordRequired),
+  });
+
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { username: "", password: "" },
   });
 
+  const isDev = process.env.NODE_ENV !== "production";
+
+  const handleQuickAdminLogin = () => {
+    setValue("username", "admin");
+    setValue("password", "Admin@1234");
+    handleSubmit(onSubmit)();
+  };
+
   const onSubmit = async (data: LoginFormValues) => {
     setError(null);
     try {
       const result = await authService.login(data);
       setAuth(result.accessToken, result.refreshToken, result.user);
-      router.push(result.user.role === "ADMIN" ? "/admin/dashboard" : "/dashboard");
+      if (result.user.mustChangePassword) {
+        router.push("/force-password");
+      } else if (result.user.role === "ADMIN") {
+        router.push("/admin/dashboard");
+      } else {
+        router.push("/employee/dashboard");
+      }
     } catch (err: unknown) {
       if (
         err &&
@@ -329,7 +350,7 @@ export default function LoginPage() {
             .message
         );
       } else {
-        setError("Something went wrong. Please try again.");
+        setError(t.auth.somethingWentWrong);
       }
     }
   };
@@ -368,26 +389,33 @@ export default function LoginPage() {
           </div>
 
           <div className="ar-brand-bottom">
-            <p className="ar-brand-tagline">Arist · Internal</p>
+            <p className="ar-brand-tagline">{t.auth.brandTagline}</p>
             <h2 className="ar-brand-title">
-              Employee
+              {t.auth.brandLineEmployee}
               <br />
-              <em>Portal</em>
+              <em>{t.auth.brandLinePortal}</em>
             </h2>
             <div className="ar-brand-divider" />
-            <p className="ar-brand-caption">
-              Secure access for Arist team members. Contact IT support if you need assistance.
-            </p>
+            <p className="ar-brand-caption">{t.auth.brandCaption}</p>
           </div>
         </div>
 
         {/* ── Right form panel ── */}
         <div className="ar-form-panel">
           <div className="ar-form-inner">
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                marginBottom: "1rem",
+              }}
+            >
+              <LanguageSwitcher variant="compact" />
+            </div>
             <div className="ar-form-header">
-              <p className="ar-form-eyebrow">Welcome back</p>
-              <h1 className="ar-form-title">Sign in</h1>
-              <p className="ar-form-desc">Enter your credentials to continue</p>
+              <p className="ar-form-eyebrow">{t.auth.welcomeBack}</p>
+              <h1 className="ar-form-title">{t.auth.signIn}</h1>
+              <p className="ar-form-desc">{t.auth.enterCredentials}</p>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -399,7 +427,7 @@ export default function LoginPage() {
 
               <div className="ar-field">
                 <label htmlFor="username" className="ar-label">
-                  Username
+                  {t.auth.username}
                 </label>
                 <div className="ar-input-wrap">
                   <input
@@ -420,7 +448,7 @@ export default function LoginPage() {
 
               <div className="ar-field">
                 <label htmlFor="password" className="ar-label">
-                  Password
+                  {t.auth.password}
                 </label>
                 <div className="ar-input-wrap">
                   <input
@@ -437,7 +465,7 @@ export default function LoginPage() {
                     className="ar-pw-btn"
                     onClick={() => setShowPassword((p) => !p)}
                     tabIndex={-1}
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={showPassword ? t.auth.hidePassword : t.auth.showPassword}
                   >
                     {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
@@ -457,9 +485,45 @@ export default function LoginPage() {
                     <span className="ar-submit-dot" style={{ animationDelay: "0.4s" }} />
                   </>
                 ) : (
-                  "Sign in"
+                  t.auth.signIn
                 )}
               </button>
+
+              {isDev && (
+                <button
+                  type="button"
+                  onClick={handleQuickAdminLogin}
+                  disabled={isSubmitting}
+                  style={{
+                    width: "100%",
+                    marginTop: "0.75rem",
+                    padding: "0.6rem 1rem",
+                    background: "transparent",
+                    color: "#92929f",
+                    border: "1px dashed #d8d8e2",
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize: "0.75rem",
+                    fontWeight: 500,
+                    letterSpacing: "0.1em",
+                    textTransform: "uppercase",
+                    cursor: isSubmitting ? "not-allowed" : "pointer",
+                    borderRadius: "1px",
+                    transition: "border-color 0.2s, color 0.2s",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isSubmitting) {
+                      e.currentTarget.style.borderColor = "#c9933a";
+                      e.currentTarget.style.color = "#c9933a";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "#d8d8e2";
+                    e.currentTarget.style.color = "#92929f";
+                  }}
+                >
+                  ⚡ {t.devTools.quickLoginAdmin}
+                </button>
+              )}
             </form>
           </div>
         </div>

@@ -4,10 +4,10 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
-  Users,
   ChevronsUpDown,
   LogOut,
-  Building2,
+  UserCircle,
+  Briefcase,
 } from "lucide-react";
 
 import { useAuthStore } from "@/stores/auth";
@@ -47,18 +47,18 @@ function useNavGroups() {
       items: [
         {
           title: t.sidebar.dashboard,
-          href: "/admin/dashboard",
+          href: "/employee/dashboard",
           icon: LayoutDashboard,
         },
       ],
     },
     {
-      label: t.sidebar.workforce,
+      label: t.sidebar.account,
       items: [
         {
-          title: t.sidebar.employees,
-          href: "/admin/employees",
-          icon: Users,
+          title: t.sidebar.profile,
+          href: "/employee/profile",
+          icon: UserCircle,
         },
       ],
     },
@@ -73,7 +73,7 @@ function getInitials(firstName?: string, lastName?: string, username?: string) {
   return username?.slice(0, 2).toUpperCase() ?? "AR";
 }
 
-export function AdminSidebar() {
+export function EmployeeSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { isMobile } = useSidebar();
@@ -87,7 +87,7 @@ export function AdminSidebar() {
     try {
       if (refreshToken) await authService.logout(refreshToken);
     } catch {
-      // swallow — proceed with local cleanup regardless
+      // swallow
     }
     logoutStore();
     router.push("/login");
@@ -96,7 +96,7 @@ export function AdminSidebar() {
   const initials = getInitials(user?.firstName, user?.lastName, user?.username);
   const displayName = user
     ? `${user.firstName} ${user.lastName}`.trim() || user.username
-    : "Admin";
+    : "Employee";
 
   return (
     <Sidebar collapsible="icon" variant="inset">
@@ -106,17 +106,17 @@ export function AdminSidebar() {
             <SidebarMenuButton
               size="lg"
               tooltip={siteConfig.name}
-              render={<Link href="/admin/dashboard" />}
+              render={<Link href="/employee/dashboard" />}
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <Building2 className="size-4" />
+                <Briefcase className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
                   {siteConfig.name}
                 </span>
                 <span className="truncate text-xs text-sidebar-foreground/60">
-                  {t.app.adminConsole}
+                  {t.sidebar.portal}
                 </span>
               </div>
             </SidebarMenuButton>

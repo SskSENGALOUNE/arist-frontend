@@ -16,26 +16,44 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { EmployeeUser } from "@/services/employee";
+import { useT } from "@/lib/i18n";
 
-const createSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  email: z.string().email("Invalid email"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  role: z.enum(["ADMIN", "EMPLOYEE"]),
-});
+function buildSchemas(t: ReturnType<typeof useT>) {
+  const createSchema = z.object({
+    username: z.string().min(1, t.employeeForm.usernameRequired),
+    email: z.string().email(t.employeeForm.invalidEmail),
+    password: z.string().min(8, t.employeeForm.passwordMin),
+    firstName: z.string().min(1, t.employeeForm.firstNameRequired),
+    lastName: z.string().min(1, t.employeeForm.lastNameRequired),
+    role: z.enum(["ADMIN", "EMPLOYEE"]),
+  });
 
-const editSchema = z.object({
-  email: z.string().email("Invalid email"),
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  role: z.enum(["ADMIN", "EMPLOYEE"]),
-  isActive: z.boolean(),
-});
+  const editSchema = z.object({
+    email: z.string().email(t.employeeForm.invalidEmail),
+    firstName: z.string().min(1, t.employeeForm.firstNameRequired),
+    lastName: z.string().min(1, t.employeeForm.lastNameRequired),
+    role: z.enum(["ADMIN", "EMPLOYEE"]),
+    isActive: z.boolean(),
+  });
 
-type CreateFormValues = z.infer<typeof createSchema>;
-type EditFormValues = z.infer<typeof editSchema>;
+  return { createSchema, editSchema };
+}
+
+type CreateFormValues = {
+  username: string;
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  role: "ADMIN" | "EMPLOYEE";
+};
+type EditFormValues = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: "ADMIN" | "EMPLOYEE";
+  isActive: boolean;
+};
 
 interface EmployeeFormDialogProps {
   open: boolean;
@@ -50,7 +68,9 @@ export function EmployeeFormDialog({
   employee,
   onSubmit,
 }: EmployeeFormDialogProps) {
+  const t = useT();
   const isEdit = !!employee;
+  const { createSchema, editSchema } = buildSchemas(t);
 
   const createForm = useForm<CreateFormValues>({
     resolver: zodResolver(createSchema),
@@ -102,17 +122,19 @@ export function EmployeeFormDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Employee" : "Create Employee"}</DialogTitle>
+          <DialogTitle>
+            {isEdit ? t.employeeForm.editTitle : t.employeeForm.createTitle}
+          </DialogTitle>
           <DialogDescription>
             {isEdit
-              ? "Update employee information."
-              : "Add a new employee to the system."}
+              ? t.employeeForm.editDescription
+              : t.employeeForm.createDescription}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           {!isEdit && (
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">{t.employeeForm.username}</Label>
               <Input
                 id="username"
                 aria-invalid={!!errors.username}
@@ -128,7 +150,7 @@ export function EmployeeFormDialog({
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="firstName">First Name</Label>
+              <Label htmlFor="firstName">{t.employeeForm.firstName}</Label>
               <Input
                 id="firstName"
                 aria-invalid={!!errors.firstName}
@@ -141,7 +163,7 @@ export function EmployeeFormDialog({
               )}
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="lastName">Last Name</Label>
+              <Label htmlFor="lastName">{t.employeeForm.lastName}</Label>
               <Input
                 id="lastName"
                 aria-invalid={!!errors.lastName}
@@ -156,7 +178,7 @@ export function EmployeeFormDialog({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t.employeeForm.email}</Label>
             <Input
               id="email"
               type="email"
@@ -172,7 +194,7 @@ export function EmployeeFormDialog({
 
           {!isEdit && (
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t.employeeForm.password}</Label>
               <Input
                 id="password"
                 type="password"
@@ -188,14 +210,14 @@ export function EmployeeFormDialog({
           )}
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="role">Role</Label>
+            <Label htmlFor="role">{t.employeeForm.role}</Label>
             <select
               id="role"
               className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
               {...form.register("role")}
             >
-              <option value="EMPLOYEE">Employee</option>
-              <option value="ADMIN">Admin</option>
+              <option value="EMPLOYEE">{t.employeeForm.roleEmployee}</option>
+              <option value="ADMIN">{t.employeeForm.roleAdmin}</option>
             </select>
           </div>
 
@@ -207,7 +229,7 @@ export function EmployeeFormDialog({
                 className="size-4 rounded border-input"
                 {...editForm.register("isActive")}
               />
-              <Label htmlFor="isActive">Active</Label>
+              <Label htmlFor="isActive">{t.employeeForm.activeLabel}</Label>
             </div>
           )}
 
@@ -217,10 +239,14 @@ export function EmployeeFormDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t.common.cancel}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Saving..." : isEdit ? "Save Changes" : "Create"}
+              {isSubmitting
+                ? t.common.saving
+                : isEdit
+                  ? t.common.saveChanges
+                  : t.common.create}
             </Button>
           </DialogFooter>
         </form>

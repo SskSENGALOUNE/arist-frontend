@@ -1,5 +1,12 @@
 import { api } from "./api";
-import type { BaseApiResponse } from "@/types";
+import type {
+  BaseApiResponse,
+  Country,
+  EducationLevel,
+  Gender,
+  GraduatedFrom,
+  LanguageLevel,
+} from "@/types";
 
 export interface EmployeeUser {
   id: string;
@@ -12,15 +19,15 @@ export interface EmployeeUser {
   mustChangePassword: boolean;
   lastLoginAt: string | null;
   photoUrl: string | null;
-  gender: string | null;
-  educationLevel: string | null;
+  gender: Gender | null;
+  educationLevel: EducationLevel | null;
   institutionName: string | null;
-  graduatedFrom: string | null;
-  graduatedCountry: string | null;
+  graduatedFrom: GraduatedFrom | null;
+  graduatedCountry: Country | null;
   fieldOfStudy: string | null;
-  englishLevel: string | null;
-  vietnameseLevel: string | null;
-  chineseLevel: string | null;
+  englishLevel: LanguageLevel | null;
+  vietnameseLevel: LanguageLevel | null;
+  chineseLevel: LanguageLevel | null;
   otherLanguages: string | null;
   passportExpiry: string | null;
   createdAt: string;
