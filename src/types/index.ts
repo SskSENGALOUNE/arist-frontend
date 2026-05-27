@@ -1,9 +1,29 @@
 export interface User {
   id: string;
+  username: string;
   email: string;
-  name: string;
-  role: "admin" | "manager" | "employee";
-  avatar?: string;
+  role: "ADMIN" | "EMPLOYEE";
+  firstName: string;
+  lastName: string;
+  mustChangePassword: boolean;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  accessTokenExpiresAt: string;
+  refreshTokenExpiresAt: string;
+  user: User;
+}
+
+export interface BaseApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: {
+    code: string;
+    message: string;
+    details?: Record<string, unknown>;
+  };
 }
 
 export interface Employee {
