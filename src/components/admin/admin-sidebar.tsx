@@ -8,6 +8,7 @@ import {
   ChevronsUpDown,
   LogOut,
   Building2,
+  Plane,
 } from "lucide-react";
 
 import { useAuthStore } from "@/stores/auth";
@@ -59,6 +60,16 @@ function useNavGroups() {
           title: t.sidebar.employees,
           href: "/admin/employees",
           icon: Users,
+        },
+      ],
+    },
+    {
+      label: t.sidebar.travel,
+      items: [
+        {
+          title: t.sidebar.businessTrips,
+          href: "/admin/business-trips",
+          icon: Plane,
         },
       ],
     },

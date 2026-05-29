@@ -1,14 +1,13 @@
 "use client";
 
-import { Languages, Check } from "lucide-react";
+import { GB, LA } from "country-flag-icons/react/3x2";
 import { locales, useLocaleStore, type Locale } from "@/lib/i18n";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+
+const FLAGS: Record<Locale, typeof GB> = {
+  en: GB,
+  lo: LA,
+};
 
 export function LanguageSwitcher({
   variant = "icon",
@@ -18,38 +17,21 @@ export function LanguageSwitcher({
   const locale = useLocaleStore((s) => s.locale);
   const setLocale = useLocaleStore((s) => s.setLocale);
 
-  const current = locales.find((l) => l.value === locale);
+  const current = locales.find((l) => l.value === locale) ?? locales[0];
+  const next = locales.find((l) => l.value !== locale) ?? locales[0];
+
+  const Flag = FLAGS[current.value];
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          variant === "icon" ? (
-            <Button variant="ghost" size="icon-sm" aria-label="Language">
-              <Languages />
-            </Button>
-          ) : (
-            <Button variant="ghost" size="sm">
-              <Languages />
-              <span>{current?.label}</span>
-            </Button>
-          )
-        }
-      />
-      <DropdownMenuContent align="end" sideOffset={6} className="min-w-36">
-        {locales.map((l) => (
-          <DropdownMenuItem
-            key={l.value}
-            onClick={() => setLocale(l.value as Locale)}
-            className="justify-between"
-          >
-            <span>{l.label}</span>
-            {locale === l.value && (
-              <Check className="size-4 text-muted-foreground" />
-            )}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Button
+      variant="ghost"
+      size={variant === "icon" ? "icon-sm" : "sm"}
+      onClick={() => setLocale(next.value)}
+      aria-label={`Switch language to ${next.label}`}
+      title={`${current.label} → ${next.label}`}
+    >
+      <Flag className="h-3.5 w-auto rounded-[2px]" />
+      {variant === "compact" && <span>{current.label}</span>}
+    </Button>
   );
 }

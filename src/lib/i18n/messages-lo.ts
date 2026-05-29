@@ -71,6 +71,8 @@ export const lo: Messages = {
     profile: "ໂປຣໄຟລ໌",
     account: "ບັນຊີ",
     portal: "ປະຕູພະນັກງານ",
+    businessTrips: "ການເດີນທາງທຸລະກິດ",
+    travel: "ການເດີນທາງ",
   },
   forcePassword: {
     title: "ກະລຸນາປ່ຽນລະຫັດຜ່ານ",
@@ -135,6 +137,8 @@ export const lo: Messages = {
     email: "ອີເມວ",
     role: "ບົດບາດ",
     status: "ສະຖານະ",
+    lastLoginAt: "ເຂົ້າສູ່ລະບົບລ່າສຸດ",
+    neverLoggedIn: "ຍັງບໍ່ເຄີຍ",
     statusActive: "ໃຊ້ງານຢູ່",
     statusInactive: "ບໍ່ໃຊ້ງານ",
     noEmployees: "ບໍ່ພົບພະນັກງານ.",
@@ -256,7 +260,6 @@ export const lo: Messages = {
     gender: {
       MALE: "ຊາຍ",
       FEMALE: "ຍິງ",
-      OTHER: "ອື່ນໆ",
     },
     languageLevel: {
       NONE: "ບໍ່ມີ",

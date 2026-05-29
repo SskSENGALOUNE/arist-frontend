@@ -10,6 +10,8 @@ import {
   Trash2,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   Eye,
   KeyRound,
 } from "lucide-react";
@@ -18,7 +20,7 @@ import {
   type EmployeeUser,
   type ListUsersParams,
 } from "@/services/employee";
-import { useT } from "@/lib/i18n";
+import { useT, useLocaleStore } from "@/lib/i18n";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -34,9 +36,51 @@ import { EmployeeFormDialog } from "@/components/employees/employee-form-dialog"
 import { DeleteEmployeeDialog } from "@/components/employees/delete-employee-dialog";
 import { ResetPasswordDialog } from "@/components/employees/reset-password-dialog";
 
+function intlLocale(locale: string) {
+  return locale === "lo" ? "lo-LA" : "en-US";
+}
+
+function formatAbsolute(value: string | null | undefined, locale: string) {
+  if (!value) return null;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleString(intlLocale(locale), {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+const RELATIVE_UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
+  ["year", 60 * 60 * 24 * 365],
+  ["month", 60 * 60 * 24 * 30],
+  ["day", 60 * 60 * 24],
+  ["hour", 60 * 60],
+  ["minute", 60],
+];
+
+function formatRelative(value: string | null | undefined, locale: string) {
+  if (!value) return null;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+  const diffSec = Math.round((d.getTime() - Date.now()) / 1000);
+  const rtf = new Intl.RelativeTimeFormat(intlLocale(locale), {
+    numeric: "auto",
+  });
+  for (const [unit, secondsInUnit] of RELATIVE_UNITS) {
+    if (Math.abs(diffSec) >= secondsInUnit) {
+      return rtf.format(Math.round(diffSec / secondsInUnit), unit);
+    }
+  }
+  return rtf.format(diffSec, "second");
+}
+
 export default function EmployeesPage() {
   const queryClient = useQueryClient();
   const t = useT();
+  const locale = useLocaleStore((s) => s.locale);
 
   const [params, setParams] = useState<ListUsersParams>({
     page: 1,
@@ -158,19 +202,45 @@ export default function EmployeesPage() {
                 <TableHead>{t.employees.email}</TableHead>
                 <TableHead>{t.employees.role}</TableHead>
                 <TableHead>{t.employees.status}</TableHead>
+                <TableHead>
+                  <button
+                    type="button"
+                    className="flex items-center gap-1 hover:text-foreground"
+                    onClick={() =>
+                      setParams((prev) => ({
+                        ...prev,
+                        page: 1,
+                        sortBy: "lastLoginAt",
+                        sortOrder:
+                          prev.sortBy === "lastLoginAt" &&
+                          prev.sortOrder === "desc"
+                            ? "asc"
+                            : "desc",
+                      }))
+                    }
+                  >
+                    {t.employees.lastLoginAt}
+                    {params.sortBy === "lastLoginAt" &&
+                      (params.sortOrder === "desc" ? (
+                        <ChevronDown className="size-3.5" />
+                      ) : (
+                        <ChevronUp className="size-3.5" />
+                      ))}
+                  </button>
+                </TableHead>
                 <TableHead className="text-right">{t.common.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     {t.common.loading}
                   </TableCell>
                 </TableRow>
               ) : !data?.items.length ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                     {t.employees.noEmployees}
                   </TableCell>
                 </TableRow>
@@ -202,6 +272,17 @@ export default function EmployeesPage() {
                           ? t.employees.statusActive
                           : t.employees.statusInactive}
                       </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {emp.lastLoginAt ? (
+                        <span title={formatAbsolute(emp.lastLoginAt, locale) ?? undefined}>
+                          {formatRelative(emp.lastLoginAt, locale)}
+                        </span>
+                      ) : (
+                        <span className="italic">
+                          {t.employees.neverLoggedIn}
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">

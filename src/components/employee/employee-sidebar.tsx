@@ -8,6 +8,7 @@ import {
   LogOut,
   UserCircle,
   Briefcase,
+  Plane,
 } from "lucide-react";
 
 import { useAuthStore } from "@/stores/auth";
@@ -49,6 +50,16 @@ function useNavGroups() {
           title: t.sidebar.dashboard,
           href: "/employee/dashboard",
           icon: LayoutDashboard,
+        },
+      ],
+    },
+    {
+      label: t.sidebar.travel,
+      items: [
+        {
+          title: t.sidebar.businessTrips,
+          href: "/employee/business-trips",
+          icon: Plane,
         },
       ],
     },

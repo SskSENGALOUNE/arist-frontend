@@ -69,6 +69,8 @@ export const en = {
     profile: "My Profile",
     account: "Account",
     portal: "Employee Portal",
+    businessTrips: "Business Trips",
+    travel: "Travel",
   },
   forcePassword: {
     title: "Update your password",
@@ -133,6 +135,8 @@ export const en = {
     email: "Email",
     role: "Role",
     status: "Status",
+    lastLoginAt: "Last login",
+    neverLoggedIn: "Never",
     statusActive: "Active",
     statusInactive: "Inactive",
     noEmployees: "No employees found.",
@@ -254,7 +258,6 @@ export const en = {
     gender: {
       MALE: "Male",
       FEMALE: "Female",
-      OTHER: "Other",
     },
     languageLevel: {
       NONE: "None",
