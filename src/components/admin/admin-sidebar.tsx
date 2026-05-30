@@ -9,6 +9,7 @@ import {
   LogOut,
   Building2,
   Plane,
+  GalleryHorizontalEnd,
 } from "lucide-react";
 
 import { useAuthStore } from "@/stores/auth";
@@ -70,6 +71,16 @@ function useNavGroups() {
           title: t.sidebar.businessTrips,
           href: "/admin/business-trips",
           icon: Plane,
+        },
+      ],
+    },
+    {
+      label: t.sidebar.content,
+      items: [
+        {
+          title: t.sidebar.banners,
+          href: "/admin/banners",
+          icon: GalleryHorizontalEnd,
         },
       ],
     },

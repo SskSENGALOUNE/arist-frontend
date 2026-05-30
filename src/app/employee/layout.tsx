@@ -3,11 +3,7 @@
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/auth";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { EmployeeSidebar } from "@/components/employee/employee-sidebar";
 import { TopbarUserMenu } from "@/components/admin/topbar-user-menu";
@@ -21,18 +17,10 @@ function HeaderTitle({ pathname }: { pathname: string }) {
     dashboard: t.employeeDashboard.title,
     profile: t.profile.title,
   };
-  return (
-    <h1 className="text-sm font-medium">
-      {seg ? (titles[seg] ?? seg) : t.sidebar.portal}
-    </h1>
-  );
+  return <h1 className="text-sm font-medium">{seg ? (titles[seg] ?? seg) : t.sidebar.portal}</h1>;
 }
 
-export default function EmployeeLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function EmployeeLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const user = useAuthStore((s) => s.user);
@@ -42,7 +30,7 @@ export default function EmployeeLayout({
   useEffect(() => {
     if (!hydrated) return;
     if (!token || !user) {
-      router.replace("/login");
+      router.replace("/");
       return;
     }
     if (user.mustChangePassword) {
@@ -54,13 +42,7 @@ export default function EmployeeLayout({
     }
   }, [hydrated, token, user, router]);
 
-  if (
-    !hydrated ||
-    !token ||
-    !user ||
-    user.mustChangePassword ||
-    user.role !== "EMPLOYEE"
-  ) {
+  if (!hydrated || !token || !user || user.mustChangePassword || user.role !== "EMPLOYEE") {
     return null;
   }
 

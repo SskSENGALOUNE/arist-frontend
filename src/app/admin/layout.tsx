@@ -3,11 +3,7 @@
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/auth";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { TopbarUserMenu } from "@/components/admin/topbar-user-menu";
@@ -22,18 +18,10 @@ function AdminHeaderTitle({ pathname }: { pathname: string }) {
     employees: t.employees.title,
     profile: t.profile.title,
   };
-  return (
-    <h1 className="text-sm font-medium">
-      {seg ? (titles[seg] ?? seg) : t.app.adminConsole}
-    </h1>
-  );
+  return <h1 className="text-sm font-medium">{seg ? (titles[seg] ?? seg) : t.app.adminConsole}</h1>;
 }
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const user = useAuthStore((s) => s.user);
@@ -43,7 +31,7 @@ export default function AdminLayout({
   useEffect(() => {
     if (!hydrated) return;
     if (!token || !user) {
-      router.replace("/login");
+      router.replace("/");
       return;
     }
     if (user.mustChangePassword) {
@@ -55,13 +43,7 @@ export default function AdminLayout({
     }
   }, [hydrated, token, user, router]);
 
-  if (
-    !hydrated ||
-    !token ||
-    !user ||
-    user.mustChangePassword ||
-    user.role !== "ADMIN"
-  ) {
+  if (!hydrated || !token || !user || user.mustChangePassword || user.role !== "ADMIN") {
     return null;
   }
 

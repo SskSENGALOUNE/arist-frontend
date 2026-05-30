@@ -55,6 +55,25 @@ export const myBusinessTripService = {
   },
 };
 
+export const businessTripService = {
+  list: async (
+    params?: ListBusinessTripsParams,
+  ): Promise<PaginatedBusinessTrips> => {
+    const response = await api.get<BaseApiResponse<PaginatedBusinessTrips>>(
+      "/business-trips",
+      { params },
+    );
+    return response.data.data!;
+  },
+
+  getById: async (id: string): Promise<BusinessTrip> => {
+    const response = await api.get<BaseApiResponse<BusinessTrip>>(
+      `/business-trips/${id}`,
+    );
+    return response.data.data!;
+  },
+};
+
 export const adminBusinessTripService = {
   list: async (
     params?: ListBusinessTripsParams,

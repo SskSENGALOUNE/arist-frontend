@@ -61,6 +61,11 @@ function useNavGroups() {
           href: "/employee/business-trips",
           icon: Plane,
         },
+        {
+          title: t.sidebar.allBusinessTrips,
+          href: "/employee/business-trips/all",
+          icon: Plane,
+        },
       ],
     },
     {
@@ -93,6 +98,20 @@ export function EmployeeSidebar() {
   const logoutStore = useAuthStore((s) => s.logout);
   const t = useT();
   const navGroups = useNavGroups();
+
+  // Pick the single best (most specific) matching nav href so nested routes
+  // like /business-trips/all don't also light up the /business-trips item.
+  const activeHref = navGroups
+    .flatMap((group) => group.items)
+    .filter(
+      (item) =>
+        pathname === item.href || pathname.startsWith(`${item.href}/`),
+    )
+    .reduce<string | null>(
+      (best, item) =>
+        best === null || item.href.length > best.length ? item.href : best,
+      null,
+    );
 
   const handleLogout = async () => {
     try {
@@ -142,9 +161,7 @@ export function EmployeeSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => {
-                  const isActive =
-                    pathname === item.href ||
-                    pathname.startsWith(`${item.href}/`);
+                  const isActive = item.href === activeHref;
                   return (
                     <SidebarMenuItem key={item.href}>
                       <SidebarMenuButton
