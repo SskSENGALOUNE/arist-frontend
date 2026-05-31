@@ -32,4 +32,15 @@ export const meService = {
     );
     return response.data.data!;
   },
+
+  uploadPhoto: async (file: File): Promise<string> => {
+    const form = new FormData();
+    form.append("photo", file);
+    const response = await api.post<BaseApiResponse<{ photoUrl: string }>>(
+      "/me/photo",
+      form,
+      { headers: { "Content-Type": "multipart/form-data" } },
+    );
+    return response.data.data!.photoUrl;
+  },
 };

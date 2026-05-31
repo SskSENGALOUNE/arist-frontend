@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronDown, LogOut, UserPen } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/stores/auth";
 import { authService } from "@/services/auth";
 import { useT } from "@/lib/i18n";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
@@ -33,8 +34,15 @@ export function TopbarUserMenu() {
   const logoutStore = useAuthStore((s) => s.logout);
   const t = useT();
 
+  const { data: me } = useQuery({
+    queryKey: ["me"],
+    queryFn: authService.me,
+    enabled: !!user,
+  });
+
   if (!user) return null;
 
+  const photoUrl = me?.photoUrl ?? undefined;
   const initials = getInitials(user.firstName, user.lastName, user.username);
   const displayName =
     `${user.firstName} ${user.lastName}`.trim() || user.username;
@@ -58,6 +66,7 @@ export function TopbarUserMenu() {
             className="flex items-center gap-2 rounded-lg px-1.5 py-1 text-sm transition-colors outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50 aria-expanded:bg-muted"
           >
             <Avatar className="size-7">
+              <AvatarImage src={photoUrl} alt={displayName} />
               <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                 {initials}
               </AvatarFallback>
@@ -79,6 +88,7 @@ export function TopbarUserMenu() {
           <DropdownMenuLabel className="p-0 font-normal">
             <div className="flex items-center gap-2 px-1 py-1.5">
               <Avatar className="size-9">
+                <AvatarImage src={photoUrl} alt={displayName} />
                 <AvatarFallback className="bg-primary text-primary-foreground">
                   {initials}
                 </AvatarFallback>

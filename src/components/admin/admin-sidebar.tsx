@@ -10,6 +10,8 @@ import {
   Building2,
   Plane,
   GalleryHorizontalEnd,
+  Layers,
+  Briefcase,
 } from "lucide-react";
 
 import { useAuthStore } from "@/stores/auth";
@@ -61,6 +63,21 @@ function useNavGroups() {
           title: t.sidebar.employees,
           href: "/admin/employees",
           icon: Users,
+        },
+      ],
+    },
+    {
+      label: t.sidebar.organization,
+      items: [
+        {
+          title: t.sidebar.departments,
+          href: "/admin/departments",
+          icon: Layers,
+        },
+        {
+          title: t.sidebar.positions,
+          href: "/admin/positions",
+          icon: Briefcase,
         },
       ],
     },

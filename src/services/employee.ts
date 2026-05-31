@@ -19,6 +19,8 @@ export interface EmployeeUser {
   mustChangePassword: boolean;
   lastLoginAt: string | null;
   photoUrl: string | null;
+  departmentId: string | null;
+  positionId: string | null;
   gender: Gender | null;
   educationLevel: EducationLevel | null;
   institutionName: string | null;
@@ -62,6 +64,8 @@ export interface CreateEmployeeData {
   role: "ADMIN" | "EMPLOYEE";
   firstName: string;
   lastName: string;
+  departmentId?: string | null;
+  positionId?: string | null;
 }
 
 export interface UpdateEmployeeData {
@@ -70,6 +74,8 @@ export interface UpdateEmployeeData {
   isActive?: boolean;
   firstName?: string;
   lastName?: string;
+  departmentId?: string | null;
+  positionId?: string | null;
 }
 
 export const employeeService = {

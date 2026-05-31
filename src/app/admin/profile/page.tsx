@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,7 +9,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { ArrowLeft, Eye, EyeOff, KeyRound, ShieldCheck, UserCog } from "lucide-react";
+import { ArrowLeft, Camera, Eye, EyeOff, KeyRound, Loader2, ShieldCheck, UserCog } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/auth";
 import { authService } from "@/services/auth";
@@ -57,7 +57,6 @@ type PasswordFormValues = {
 };
 
 type ProfileFormValues = {
-  photoUrl: string;
   gender: Gender | "";
   educationLevel: EducationLevel | "";
   institutionName: string;
@@ -147,6 +146,9 @@ export default function ProfilePage() {
   const [profileFeedback, setProfileFeedback] = useState<
     { kind: "success" | "error"; message: string } | null
   >(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   const { data: me, isLoading } = useQuery({
     queryKey: ["me"],
@@ -164,7 +166,6 @@ export default function ProfilePage() {
 
   const profileForm = useForm<ProfileFormValues>({
     defaultValues: {
-      photoUrl: "",
       gender: "",
       educationLevel: "",
       institutionName: "",
@@ -182,7 +183,6 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!me) return;
     profileForm.reset({
-      photoUrl: me.photoUrl ?? "",
       gender: (me.gender as Gender) ?? "",
       educationLevel: (me.educationLevel as EducationLevel) ?? "",
       institutionName: me.institutionName ?? "",
@@ -226,10 +226,24 @@ export default function ProfilePage() {
     }
   });
 
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPhotoPreview(URL.createObjectURL(file));
+    setPhotoUploading(true);
+    try {
+      await meService.uploadPhoto(file);
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+    } catch {
+      setPhotoPreview(null);
+    } finally {
+      setPhotoUploading(false);
+    }
+  };
+
   const onProfileSubmit = profileForm.handleSubmit(async (data) => {
     setProfileFeedback(null);
     const payload: UpdateProfileData = {};
-    if (data.photoUrl) payload.photoUrl = data.photoUrl;
     if (data.gender) payload.gender = data.gender;
     if (data.educationLevel) payload.educationLevel = data.educationLevel;
     if (data.institutionName) payload.institutionName = data.institutionName;
@@ -297,14 +311,36 @@ export default function ProfilePage() {
             <CardDescription>{t.profile.accountDescription}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-4 py-2">
-            <Avatar className="size-20">
-              {me?.photoUrl && (
-                <AvatarImage src={me.photoUrl} alt={displayName} />
-              )}
-              <AvatarFallback className="bg-primary text-primary-foreground text-xl">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className="size-20">
+                <AvatarImage
+                  src={photoPreview ?? me?.photoUrl ?? undefined}
+                  alt={displayName}
+                />
+                <AvatarFallback className="bg-primary text-primary-foreground text-xl">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <button
+                type="button"
+                onClick={() => photoInputRef.current?.click()}
+                disabled={photoUploading}
+                className="absolute bottom-0 right-0 flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground shadow hover:bg-primary/90 disabled:opacity-50"
+              >
+                {photoUploading ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Camera className="size-3.5" />
+                )}
+              </button>
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/webp"
+                className="hidden"
+                onChange={handlePhotoChange}
+              />
+            </div>
             <div className="flex flex-col items-center gap-1 text-center">
               <p className="text-base font-semibold">{displayName}</p>
               <p className="text-sm text-muted-foreground">{user.email}</p>
@@ -371,16 +407,6 @@ export default function ProfilePage() {
                   {profileFeedback.message}
                 </div>
               )}
-
-              <div className="flex flex-col gap-1.5 md:col-span-2">
-                <Label htmlFor="photoUrl">{t.profile.photoUrl}</Label>
-                <Input
-                  id="photoUrl"
-                  type="url"
-                  placeholder="https://..."
-                  {...profileForm.register("photoUrl")}
-                />
-              </div>
 
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="gender">{t.profile.gender}</Label>

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
 import {
   Dialog,
   DialogContent,
@@ -16,6 +17,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { EmployeeUser } from "@/services/employee";
+import { departmentService } from "@/services/department";
+import { positionService } from "@/services/position";
 import { useT } from "@/lib/i18n";
 
 function buildSchemas(t: ReturnType<typeof useT>) {
@@ -26,6 +29,8 @@ function buildSchemas(t: ReturnType<typeof useT>) {
     firstName: z.string().min(1, t.employeeForm.firstNameRequired),
     lastName: z.string().min(1, t.employeeForm.lastNameRequired),
     role: z.enum(["ADMIN", "EMPLOYEE"]),
+    departmentId: z.string().optional(),
+    positionId: z.string().optional(),
   });
 
   const editSchema = z.object({
@@ -34,6 +39,8 @@ function buildSchemas(t: ReturnType<typeof useT>) {
     lastName: z.string().min(1, t.employeeForm.lastNameRequired),
     role: z.enum(["ADMIN", "EMPLOYEE"]),
     isActive: z.boolean(),
+    departmentId: z.string().optional(),
+    positionId: z.string().optional(),
   });
 
   return { createSchema, editSchema };
@@ -46,6 +53,8 @@ type CreateFormValues = {
   firstName: string;
   lastName: string;
   role: "ADMIN" | "EMPLOYEE";
+  departmentId?: string;
+  positionId?: string;
 };
 type EditFormValues = {
   email: string;
@@ -53,6 +62,8 @@ type EditFormValues = {
   lastName: string;
   role: "ADMIN" | "EMPLOYEE";
   isActive: boolean;
+  departmentId?: string;
+  positionId?: string;
 };
 
 interface EmployeeFormDialogProps {
@@ -61,6 +72,9 @@ interface EmployeeFormDialogProps {
   employee?: EmployeeUser | null;
   onSubmit: (data: CreateFormValues | EditFormValues) => Promise<void>;
 }
+
+const selectClass =
+  "h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
 
 export function EmployeeFormDialog({
   open,
@@ -72,6 +86,18 @@ export function EmployeeFormDialog({
   const isEdit = !!employee;
   const { createSchema, editSchema } = buildSchemas(t);
 
+  const { data: departments = [] } = useQuery({
+    queryKey: ["departments", "active"],
+    queryFn: () => departmentService.list(true),
+    enabled: open,
+  });
+
+  const { data: positions = [] } = useQuery({
+    queryKey: ["positions", "active"],
+    queryFn: () => positionService.list(true),
+    enabled: open,
+  });
+
   const createForm = useForm<CreateFormValues>({
     resolver: zodResolver(createSchema),
     defaultValues: {
@@ -81,6 +107,8 @@ export function EmployeeFormDialog({
       firstName: "",
       lastName: "",
       role: "EMPLOYEE",
+      departmentId: "",
+      positionId: "",
     },
   });
 
@@ -92,6 +120,8 @@ export function EmployeeFormDialog({
       lastName: "",
       role: "EMPLOYEE",
       isActive: true,
+      departmentId: "",
+      positionId: "",
     },
   });
 
@@ -103,6 +133,8 @@ export function EmployeeFormDialog({
         lastName: employee.lastName,
         role: employee.role,
         isActive: employee.isActive,
+        departmentId: employee.departmentId ?? "",
+        positionId: employee.positionId ?? "",
       });
     } else {
       createForm.reset();
@@ -113,7 +145,12 @@ export function EmployeeFormDialog({
   const { formState: { errors, isSubmitting } } = form;
 
   const handleSubmit = form.handleSubmit(async (data) => {
-    await onSubmit(data);
+    const payload = {
+      ...data,
+      departmentId: data.departmentId || null,
+      positionId: data.positionId || null,
+    };
+    await onSubmit(payload as CreateFormValues | EditFormValues);
     onOpenChange(false);
     form.reset();
   });
@@ -209,11 +246,44 @@ export function EmployeeFormDialog({
             </div>
           )}
 
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="departmentId">{t.employeeForm.department}</Label>
+              <select
+                id="departmentId"
+                className={selectClass}
+                {...form.register("departmentId")}
+              >
+                <option value="">{t.employeeForm.noDepartment}</option>
+                {departments.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="positionId">{t.employeeForm.position}</Label>
+              <select
+                id="positionId"
+                className={selectClass}
+                {...form.register("positionId")}
+              >
+                <option value="">{t.employeeForm.noPosition}</option>
+                {positions.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="role">{t.employeeForm.role}</Label>
             <select
               id="role"
-              className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              className={selectClass}
               {...form.register("role")}
             >
               <option value="EMPLOYEE">{t.employeeForm.roleEmployee}</option>
