@@ -1,21 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import {
-  Eye,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { adminBusinessTripService } from "@/services/business-trip";
 import type {
   BusinessTrip,
   ListBusinessTripsParams,
   TripStatus,
 } from "@/types/business-trip";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -60,6 +56,7 @@ function employeeName(trip: BusinessTrip): string {
 }
 
 export default function AdminBusinessTripsPage() {
+  const router = useRouter();
   const [params, setParams] = useState<ListBusinessTripsParams>({
     page: 1,
     limit: 10,
@@ -97,14 +94,13 @@ export default function AdminBusinessTripsPage() {
                 <TableHead>Departure</TableHead>
                 <TableHead>Return</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
                   <TableCell
-                    colSpan={8}
+                    colSpan={7}
                     className="text-center py-8 text-muted-foreground"
                   >
                     Loading...
@@ -113,7 +109,7 @@ export default function AdminBusinessTripsPage() {
               ) : !data?.items.length ? (
                 <TableRow>
                   <TableCell
-                    colSpan={8}
+                    colSpan={7}
                     className="text-center py-8 text-muted-foreground"
                   >
                     No business trips found.
@@ -121,18 +117,17 @@ export default function AdminBusinessTripsPage() {
                 </TableRow>
               ) : (
                 data.items.map((trip) => (
-                  <TableRow key={trip.id}>
+                  <TableRow
+                    key={trip.id}
+                    className="cursor-pointer"
+                    onClick={() =>
+                      router.push(`/admin/business-trips/${trip.id}`)
+                    }
+                  >
                     <TableCell className="font-medium">
                       {employeeName(trip)}
                     </TableCell>
-                    <TableCell>
-                      <Link
-                        href={`/admin/business-trips/${trip.id}`}
-                        className="hover:underline"
-                      >
-                        {trip.title}
-                      </Link>
-                    </TableCell>
+                    <TableCell>{trip.title}</TableCell>
                     <TableCell>
                       <Badge variant="outline">{trip.tripType}</Badge>
                     </TableCell>
@@ -147,18 +142,6 @@ export default function AdminBusinessTripsPage() {
                       <Badge variant={statusVariant(trip.status)}>
                         {trip.status}
                       </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Link
-                        href={`/admin/business-trips/${trip.id}`}
-                        className={buttonVariants({
-                          variant: "ghost",
-                          size: "icon-xs",
-                        })}
-                        title="View"
-                      >
-                        <Eye className="size-3.5" />
-                      </Link>
                     </TableCell>
                   </TableRow>
                 ))

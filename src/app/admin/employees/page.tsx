@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Search,
@@ -12,7 +12,6 @@ import {
   ChevronRight,
   ChevronUp,
   ChevronDown,
-  Eye,
   KeyRound,
 } from "lucide-react";
 import {
@@ -21,9 +20,10 @@ import {
   type ListUsersParams,
 } from "@/services/employee";
 import { useT, useLocaleStore } from "@/lib/i18n";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Table,
   TableBody,
@@ -38,6 +38,14 @@ import { ResetPasswordDialog } from "@/components/employees/reset-password-dialo
 
 function intlLocale(locale: string) {
   return locale === "lo" ? "lo-LA" : "en-US";
+}
+
+function getInitials(firstName?: string, lastName?: string, username?: string) {
+  const fi = firstName?.trim()?.[0] ?? "";
+  const li = lastName?.trim()?.[0] ?? "";
+  const initials = `${fi}${li}`.toUpperCase();
+  if (initials) return initials;
+  return username?.slice(0, 2).toUpperCase() ?? "AR";
 }
 
 function formatAbsolute(value: string | null | undefined, locale: string) {
@@ -79,6 +87,7 @@ function formatRelative(value: string | null | undefined, locale: string) {
 
 export default function EmployeesPage() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const t = useT();
   const locale = useLocaleStore((s) => s.locale);
 
@@ -140,7 +149,7 @@ export default function EmployeesPage() {
       });
     } else {
       await createMutation.mutateAsync(
-        formData as Parameters<typeof employeeService.create>[0],
+        formData as unknown as Parameters<typeof employeeService.create>[0],
       );
     }
   };
@@ -246,14 +255,28 @@ export default function EmployeesPage() {
                 </TableRow>
               ) : (
                 data.items.map((emp) => (
-                  <TableRow key={emp.id}>
+                  <TableRow
+                    key={emp.id}
+                    className="cursor-pointer"
+                    onClick={() => router.push(`/admin/employees/${emp.id}`)}
+                  >
                     <TableCell className="font-medium">
-                      <Link
-                        href={`/admin/employees/${emp.id}`}
-                        className="hover:underline"
-                      >
-                        {emp.firstName} {emp.lastName}
-                      </Link>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="size-8 shrink-0">
+                          {emp.photoUrl && (
+                            <AvatarImage
+                              src={emp.photoUrl}
+                              alt={`${emp.firstName} ${emp.lastName}`}
+                            />
+                          )}
+                          <AvatarFallback className="bg-primary text-primary-foreground text-xs">
+                            {getInitials(emp.firstName, emp.lastName, emp.username)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span>
+                          {emp.firstName} {emp.lastName}
+                        </span>
+                      </div>
                     </TableCell>
                     <TableCell>{emp.username}</TableCell>
                     <TableCell>{emp.email}</TableCell>
@@ -285,17 +308,10 @@ export default function EmployeesPage() {
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Link
-                          href={`/admin/employees/${emp.id}`}
-                          className={buttonVariants({
-                            variant: "ghost",
-                            size: "icon-xs",
-                          })}
-                          title={t.common.view}
-                        >
-                          <Eye className="size-3.5" />
-                        </Link>
+                      <div
+                        className="flex items-center justify-end gap-1"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <Button
                           variant="ghost"
                           size="icon-xs"

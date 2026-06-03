@@ -64,6 +64,7 @@ export interface CreateEmployeeData {
   role: "ADMIN" | "EMPLOYEE";
   firstName: string;
   lastName: string;
+  gender?: Gender | null;
   departmentId?: string | null;
   positionId?: string | null;
 }

@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { EmployeeUser } from "@/services/employee";
+import type { Gender } from "@/types";
 import { departmentService } from "@/services/department";
 import { positionService } from "@/services/position";
 import { useT } from "@/lib/i18n";
@@ -29,6 +30,7 @@ function buildSchemas(t: ReturnType<typeof useT>) {
     firstName: z.string().min(1, t.employeeForm.firstNameRequired),
     lastName: z.string().min(1, t.employeeForm.lastNameRequired),
     role: z.enum(["ADMIN", "EMPLOYEE"]),
+    gender: z.enum(["MALE", "FEMALE"], { message: t.employeeForm.genderRequired }),
     departmentId: z.string().optional(),
     positionId: z.string().optional(),
   });
@@ -53,6 +55,7 @@ type CreateFormValues = {
   firstName: string;
   lastName: string;
   role: "ADMIN" | "EMPLOYEE";
+  gender?: Gender | "";
   departmentId?: string;
   positionId?: string;
 };
@@ -107,6 +110,7 @@ export function EmployeeFormDialog({
       firstName: "",
       lastName: "",
       role: "EMPLOYEE",
+      gender: "",
       departmentId: "",
       positionId: "",
     },
@@ -149,6 +153,7 @@ export function EmployeeFormDialog({
       ...data,
       departmentId: data.departmentId || null,
       positionId: data.positionId || null,
+      ...("gender" in data ? { gender: data.gender || null } : {}),
     };
     await onSubmit(payload as CreateFormValues | EditFormValues);
     onOpenChange(false);
@@ -279,16 +284,40 @@ export function EmployeeFormDialog({
             </div>
           </div>
 
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="role">{t.employeeForm.role}</Label>
-            <select
-              id="role"
-              className={selectClass}
-              {...form.register("role")}
-            >
-              <option value="EMPLOYEE">{t.employeeForm.roleEmployee}</option>
-              <option value="ADMIN">{t.employeeForm.roleAdmin}</option>
-            </select>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="role">{t.employeeForm.role}</Label>
+              <select
+                id="role"
+                className={selectClass}
+                {...form.register("role")}
+              >
+                <option value="EMPLOYEE">{t.employeeForm.roleEmployee}</option>
+                <option value="ADMIN">{t.employeeForm.roleAdmin}</option>
+              </select>
+            </div>
+            {!isEdit && (
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="gender">{t.employeeForm.gender}</Label>
+                <select
+                  id="gender"
+                  className={selectClass}
+                  aria-invalid={!!(errors as Record<string, unknown>).gender}
+                  {...createForm.register("gender")}
+                >
+                  <option value="" disabled>
+                    {t.employeeForm.selectGender}
+                  </option>
+                  <option value="MALE">{t.enums.gender.MALE}</option>
+                  <option value="FEMALE">{t.enums.gender.FEMALE}</option>
+                </select>
+                {(errors as Record<string, { message?: string }>).gender && (
+                  <p className="text-xs text-destructive">
+                    {(errors as Record<string, { message?: string }>).gender?.message}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           {isEdit && (

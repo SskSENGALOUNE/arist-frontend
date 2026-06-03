@@ -236,6 +236,8 @@ export const en = {
     activeLabel: "Active",
     department: "Department",
     position: "Position",
+    gender: "Gender",
+    selectGender: "Select gender",
     noDepartment: "No department",
     noPosition: "No position",
     usernameRequired: "Username is required",
@@ -243,6 +245,7 @@ export const en = {
     passwordMin: "Password must be at least 8 characters",
     firstNameRequired: "First name is required",
     lastNameRequired: "Last name is required",
+    genderRequired: "Gender is required",
   },
   departments: {
     heading: "Departments",

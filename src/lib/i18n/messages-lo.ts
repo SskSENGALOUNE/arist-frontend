@@ -238,6 +238,8 @@ export const lo: Messages = {
     activeLabel: "ໃຊ້ງານ",
     department: "ພະແນກ",
     position: "ຕຳແໜ່ງ",
+    gender: "ເພດ",
+    selectGender: "ເລືອກເພດ",
     noDepartment: "ບໍ່ມີພະແນກ",
     noPosition: "ບໍ່ມີຕຳແໜ່ງ",
     usernameRequired: "ກະລຸນາໃສ່ຊື່ຜູ້ໃຊ້",
@@ -245,6 +247,7 @@ export const lo: Messages = {
     passwordMin: "ລະຫັດຜ່ານຕ້ອງມີຢ່າງໜ້ອຍ 8 ຕົວອັກສອນ",
     firstNameRequired: "ກະລຸນາໃສ່ຊື່",
     lastNameRequired: "ກະລຸນາໃສ່ນາມສະກຸນ",
+    genderRequired: "ກະລຸນາເລືອກເພດ",
   },
   departments: {
     heading: "ພະແນກ",
