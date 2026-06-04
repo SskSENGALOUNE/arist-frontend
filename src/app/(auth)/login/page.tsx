@@ -10,6 +10,7 @@ import { authService } from "@/services/auth";
 import { useAuthStore } from "@/stores/auth";
 import { useT } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 
 type LoginFormValues = {
   username: string;
@@ -297,6 +298,7 @@ const css = `
 export default function LoginPage() {
   const router = useRouter();
   const t = useT();
+  const { data: site } = useSiteSettings();
   const setAuth = useAuthStore((s) => s.setAuth);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -373,10 +375,33 @@ export default function LoginPage() {
 
           <div className="ar-card-top">
             <div className="ar-brand-mark">
-              <div className="ar-logo-mark">
-                <Briefcase size={16} color="#fff" />
+              <div
+                className="ar-logo-mark"
+                style={
+                  site?.logoUrl
+                    ? { background: "transparent", boxShadow: "none", animation: "none" }
+                    : undefined
+                }
+              >
+                {site?.logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={site.logoUrl}
+                    alt={site.brandName ?? t.landing.brand}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                      borderRadius: 10,
+                    }}
+                  />
+                ) : (
+                  <Briefcase size={16} color="#fff" />
+                )}
               </div>
-              <span className="ar-brand-name">{t.landing.brand}</span>
+              <span className="ar-brand-name">
+                {site?.brandName?.trim() || t.landing.brand}
+              </span>
             </div>
             <LanguageSwitcher variant="compact" />
           </div>
@@ -470,6 +495,23 @@ export default function LoginPage() {
             )}
           </form>
         </div>
+
+        <footer
+          style={{
+            position: "absolute",
+            bottom: 16,
+            left: 0,
+            right: 0,
+            zIndex: 1,
+            textAlign: "center",
+            fontSize: 12,
+            color: "#475569",
+            padding: "0 1rem",
+          }}
+        >
+          {site?.footerText?.trim() ||
+            t.footer.fallbackText(new Date().getFullYear())}
+        </footer>
       </div>
     </>
   );

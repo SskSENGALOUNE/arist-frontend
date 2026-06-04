@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { TopbarUserMenu } from "@/components/admin/topbar-user-menu";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { Footer } from "@/components/footer";
 import { useT } from "@/lib/i18n";
 
 function AdminHeaderTitle({ pathname }: { pathname: string }) {
@@ -17,6 +18,7 @@ function AdminHeaderTitle({ pathname }: { pathname: string }) {
     dashboard: t.dashboard.title,
     employees: t.employees.title,
     profile: t.profile.title,
+    settings: t.siteSettings.heading,
   };
   return <h1 className="text-sm font-medium">{seg ? (titles[seg] ?? seg) : t.app.adminConsole}</h1>;
 }
@@ -61,6 +63,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </header>
         <div className="flex flex-1 flex-col">{children}</div>
+        <Footer />
       </SidebarInset>
     </SidebarProvider>
   );

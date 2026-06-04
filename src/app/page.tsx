@@ -1,10 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Briefcase, Plane, ShieldCheck, Users } from "lucide-react";
+import {
+  ArrowRight,
+  Briefcase,
+  Mail,
+  MapPin,
+  Phone,
+  Plane,
+  Search,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { buttonVariants } from "@/components/ui/button";
+import { useSiteSettings } from "@/hooks/use-site-settings";
+import { buildSocialLinks } from "@/components/social-icons";
 import { useEffect, useRef, useState } from "react";
 
 /* ─── Global keyframes injected once ─────────────────────────── */
@@ -105,6 +117,7 @@ export default function Home() {
     <>
       <style>{KEYFRAMES}</style>
       <div
+        id="top"
         className="flex min-h-screen flex-col"
         style={{ background: "#030712", color: "#e2e8f0", fontFamily: "system-ui, sans-serif" }}
       >
@@ -142,11 +155,23 @@ type Feature = {
 ═══════════════════════════════════════════════════════════════ */
 function NavBar({ t }: { t: T }) {
   const [scrolled, setScrolled] = useState(false);
+  const { data: site } = useSiteSettings();
+  const brandName = site?.brandName?.trim() || t.landing.brand;
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 12);
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
   }, []);
+
+  // Center menu — Home scrolls to top; the rest are placeholders to point at
+  // real sections/pages once they exist.
+  const navItems = [
+    { label: t.landing.navHome, href: "#top", active: true },
+    { label: t.landing.navCompany, href: "#features", active: false },
+    { label: t.landing.navManagement, href: "#features", active: false },
+    { label: t.landing.navMedia, href: "#", active: false },
+    { label: t.landing.navCareer, href: "#", active: false },
+  ];
 
   return (
     <header
@@ -154,7 +179,6 @@ function NavBar({ t }: { t: T }) {
         position: "sticky",
         top: 0,
         zIndex: 50,
-        borderBottom: "1px solid rgba(6,182,212,0.12)",
         transition: "background 0.4s, backdrop-filter 0.4s",
         background: scrolled ? "rgba(3,7,18,0.75)" : "transparent",
         backdropFilter: scrolled ? "blur(20px) saturate(180%)" : "none",
@@ -162,50 +186,156 @@ function NavBar({ t }: { t: T }) {
     >
       <div
         style={{
-          maxWidth: 1152,
+          maxWidth: 1280,
           margin: "0 auto",
-          padding: "0 24px",
+          padding: "12px 24px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          height: 64,
+          gap: 16,
+          height: 72,
         }}
       >
         {/* Logo */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <Link
+          href="#top"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            textDecoration: "none",
+          }}
+        >
           <div
             style={{
-              width: 34,
-              height: 34,
-              borderRadius: 10,
-              background: "linear-gradient(135deg,#0ea5e9,#06b6d4)",
+              width: 38,
+              height: 38,
+              borderRadius: 11,
+              overflow: "hidden",
+              background: site?.logoUrl
+                ? "transparent"
+                : "linear-gradient(135deg,#0ea5e9,#06b6d4)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              boxShadow: "0 0 16px rgba(6,182,212,0.5)",
-              animation: "pulseRing 2.5s ease-in-out infinite",
-              transition: "transform 0.2s",
-              cursor: "default",
+              boxShadow: site?.logoUrl ? "none" : "0 0 16px rgba(6,182,212,0.5)",
             }}
           >
-            <Briefcase style={{ width: 16, height: 16, color: "#fff" }} />
+            {site?.logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={site.logoUrl}
+                alt={brandName}
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
+              />
+            ) : (
+              <Briefcase style={{ width: 18, height: 18, color: "#fff" }} />
+            )}
           </div>
-          <span style={{ fontWeight: 600, fontSize: 15, color: "#f1f5f9" }}>{t.landing.brand}</span>
-        </div>
+          <span style={{ fontWeight: 700, fontSize: 17, color: "#f1f5f9" }}>
+            {brandName}
+          </span>
+        </Link>
 
-        {/* Right */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        {/* Right capsule: nav + search + Get In Touch */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: 6,
+            borderRadius: 999,
+            border: "1px solid rgba(148,163,184,0.18)",
+            background: "rgba(15,23,42,0.55)",
+            backdropFilter: "blur(12px)",
+          }}
+        >
+          <nav style={{ display: "flex", alignItems: "center", gap: 2 }}>
+            {navItems.map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  height: 40,
+                  padding: "0 16px",
+                  borderRadius: 999,
+                  fontSize: 14,
+                  fontWeight: 500,
+                  textDecoration: "none",
+                  color: item.active ? "#f8fafc" : "#cbd5e1",
+                  border: item.active
+                    ? "1px solid rgba(148,163,184,0.45)"
+                    : "1px solid transparent",
+                  transition: "color 0.2s, background 0.2s",
+                }}
+                onMouseEnter={(e) =>
+                  ((e.currentTarget as HTMLAnchorElement).style.color = "#67e8f9")
+                }
+                onMouseLeave={(e) =>
+                  ((e.currentTarget as HTMLAnchorElement).style.color = item.active
+                    ? "#f8fafc"
+                    : "#cbd5e1")
+                }
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+
+          <div
+            style={{
+              width: 1,
+              height: 24,
+              background: "rgba(148,163,184,0.25)",
+              margin: "0 4px",
+            }}
+          />
+
           <LanguageSwitcher />
+
+          <button
+            type="button"
+            aria-label={t.landing.searchLabel}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 40,
+              height: 40,
+              borderRadius: 999,
+              border: "1px solid rgba(148,163,184,0.3)",
+              background: "transparent",
+              color: "#cbd5e1",
+              cursor: "pointer",
+              transition: "color 0.2s, border-color 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.color = "#67e8f9";
+              (e.currentTarget as HTMLButtonElement).style.borderColor =
+                "rgba(6,182,212,0.5)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.color = "#cbd5e1";
+              (e.currentTarget as HTMLButtonElement).style.borderColor =
+                "rgba(148,163,184,0.3)";
+            }}
+          >
+            <Search style={{ width: 17, height: 17 }} />
+          </button>
+
           <Link
             href="/login"
             style={{
               display: "inline-flex",
               alignItems: "center",
-              height: 36,
-              padding: "0 18px",
-              borderRadius: 8,
-              fontSize: 13,
-              fontWeight: 500,
+              gap: 8,
+              height: 40,
+              padding: "0 20px",
+              borderRadius: 999,
+              fontSize: 14,
+              fontWeight: 600,
               color: "#fff",
               background: "linear-gradient(135deg,#0284c7,#06b6d4)",
               boxShadow: "0 0 18px rgba(6,182,212,0.35)",
@@ -223,7 +353,8 @@ function NavBar({ t }: { t: T }) {
               (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)";
             }}
           >
-            {t.landing.signIn}
+            <Phone style={{ width: 15, height: 15 }} />
+            {t.landing.getInTouch}
           </Link>
         </div>
       </div>
@@ -936,7 +1067,7 @@ function StatsStrip({ t }: { t: T }) {
 ═══════════════════════════════════════════════════════════════ */
 function FeaturesSection({ features, t }: { features: Feature[]; t: T }) {
   return (
-    <section style={{ background: "rgba(3,7,18,0.95)" }}>
+    <section id="features" style={{ background: "rgba(3,7,18,0.95)", scrollMarginTop: 80 }}>
       <div style={{ maxWidth: 1152, margin: "0 auto", padding: "96px 24px" }}>
         <div style={{ textAlign: "center", maxWidth: 560, margin: "0 auto 56px" }}>
           <h2
@@ -1076,7 +1207,19 @@ function RevealCard({ children, delay = 0 }: { children: React.ReactNode; delay?
    FOOTER
 ═══════════════════════════════════════════════════════════════ */
 function SiteFooter({ t }: { t: T }) {
-  const columns = [
+  const { data: site } = useSiteSettings();
+  const brandName = site?.brandName?.trim() || t.landing.brand;
+  const tagline = site?.description?.trim() || t.landing.footerTagline;
+  const socials = buildSocialLinks(site);
+  const footerLinks = site?.footerLinks ?? [];
+  const linksHeading = site?.linksHeading?.trim() || t.footer.linksHeading;
+  const hasContact = Boolean(
+    site?.contactPhone || site?.contactEmail || site?.contactAddress,
+  );
+
+  // Marketing columns are the fallback shown only until footer links / contact
+  // are configured in /admin/settings.
+  const marketingColumns = [
     {
       title: t.landing.footerProduct,
       links: [t.landing.linkFeatures, t.landing.linkBusinessTrips, t.landing.linkEmployees],
@@ -1084,6 +1227,21 @@ function SiteFooter({ t }: { t: T }) {
     { title: t.landing.footerCompany, links: [t.landing.linkAbout, t.landing.linkContact] },
     { title: t.landing.footerLegal, links: [t.landing.linkPrivacy, t.landing.linkTerms] },
   ];
+  const useFallback = footerLinks.length === 0 && !hasContact;
+
+  const rightCols = useFallback
+    ? marketingColumns.length
+    : (footerLinks.length > 0 ? 1 : 0) + (hasContact ? 1 : 0);
+  const gridTemplateColumns = `1.5fr ${"1fr ".repeat(Math.max(rightCols, 1)).trim()}`;
+
+  const colTitleStyle: React.CSSProperties = {
+    fontSize: 12,
+    fontWeight: 600,
+    color: "#94a3b8",
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    marginBottom: 16,
+  };
 
   return (
     <footer
@@ -1103,7 +1261,7 @@ function SiteFooter({ t }: { t: T }) {
         }}
       />
       <div style={{ maxWidth: 1152, margin: "0 auto", padding: "56px 24px 40px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr 1fr", gap: 40 }}>
+        <div style={{ display: "grid", gridTemplateColumns, gap: 40 }}>
           {/* Brand */}
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
@@ -1112,38 +1270,102 @@ function SiteFooter({ t }: { t: T }) {
                   width: 32,
                   height: 32,
                   borderRadius: 9,
-                  background: "linear-gradient(135deg,#0ea5e9,#06b6d4)",
+                  overflow: "hidden",
+                  background: site?.logoUrl
+                    ? "transparent"
+                    : "linear-gradient(135deg,#0ea5e9,#06b6d4)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  boxShadow: "0 0 14px rgba(6,182,212,0.4)",
+                  boxShadow: site?.logoUrl ? "none" : "0 0 14px rgba(6,182,212,0.4)",
                 }}
               >
-                <Briefcase style={{ width: 14, height: 14, color: "#fff" }} />
+                {site?.logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={site.logoUrl}
+                    alt={brandName}
+                    style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                  />
+                ) : (
+                  <Briefcase style={{ width: 14, height: 14, color: "#fff" }} />
+                )}
               </div>
               <span style={{ fontWeight: 600, fontSize: 14, color: "#f1f5f9" }}>
-                {t.landing.brand}
+                {brandName}
               </span>
             </div>
             <p style={{ fontSize: 13, color: "#475569", lineHeight: 1.7, maxWidth: 240 }}>
-              {t.landing.footerTagline}
+              {tagline}
             </p>
+            {socials.length > 0 && (
+              <div style={{ display: "flex", gap: 14, marginTop: 16 }}>
+                {socials.map(({ url, Icon, label }) => (
+                  <a
+                    key={label}
+                    href={url}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={label}
+                    style={{ color: "#64748b", transition: "color 0.2s", display: "flex" }}
+                    onMouseEnter={(e) =>
+                      ((e.currentTarget as HTMLAnchorElement).style.color = "#67e8f9")
+                    }
+                    onMouseLeave={(e) =>
+                      ((e.currentTarget as HTMLAnchorElement).style.color = "#64748b")
+                    }
+                  >
+                    <Icon style={{ width: 18, height: 18 }} />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
-          {columns.map((col) => (
-            <div key={col.title}>
-              <h3
-                style={{
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: "#94a3b8",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  marginBottom: 16,
-                }}
-              >
-                {col.title}
-              </h3>
+          {/* Fallback marketing columns — only until Site Settings are filled in */}
+          {useFallback &&
+            marketingColumns.map((col) => (
+              <div key={col.title}>
+                <h3 style={colTitleStyle}>{col.title}</h3>
+                <ul
+                  style={{
+                    listStyle: "none",
+                    padding: 0,
+                    margin: 0,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 10,
+                  }}
+                >
+                  {col.links.map((link) => (
+                    <li key={link}>
+                      <Link
+                        href="/login"
+                        style={{
+                          fontSize: 13,
+                          color: "#475569",
+                          textDecoration: "none",
+                          transition: "color 0.2s",
+                        }}
+                        onMouseEnter={(e) =>
+                          ((e.currentTarget as HTMLAnchorElement).style.color = "#7dd3fc")
+                        }
+                        onMouseLeave={(e) =>
+                          ((e.currentTarget as HTMLAnchorElement).style.color = "#475569")
+                        }
+                      >
+                        {link}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+
+          {/* Configured footer links (from /admin/settings) */}
+          {!useFallback && footerLinks.length > 0 && (
+            <div>
+              <h3 style={colTitleStyle}>{linksHeading}</h3>
               <ul
                 style={{
                   listStyle: "none",
@@ -1154,10 +1376,12 @@ function SiteFooter({ t }: { t: T }) {
                   gap: 10,
                 }}
               >
-                {col.links.map((link) => (
-                  <li key={link}>
-                    <Link
-                      href="/login"
+                {footerLinks.map((link, i) => (
+                  <li key={`${link.url}-${i}`}>
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noreferrer"
                       style={{
                         fontSize: 13,
                         color: "#475569",
@@ -1171,13 +1395,63 @@ function SiteFooter({ t }: { t: T }) {
                         ((e.currentTarget as HTMLAnchorElement).style.color = "#475569")
                       }
                     >
-                      {link}
-                    </Link>
+                      {link.label}
+                    </a>
                   </li>
                 ))}
               </ul>
             </div>
-          ))}
+          )}
+
+          {/* Configured contact info (from /admin/settings) */}
+          {!useFallback && hasContact && (
+            <div>
+              <h3 style={colTitleStyle}>{t.footer.contactHeading}</h3>
+              <ul
+                style={{
+                  listStyle: "none",
+                  padding: 0,
+                  margin: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                }}
+              >
+                {site?.contactPhone && (
+                  <li style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Phone style={{ width: 15, height: 15, color: "#06b6d4", flexShrink: 0 }} />
+                    <a
+                      href={`tel:${site.contactPhone}`}
+                      style={{ fontSize: 13, color: "#94a3b8", textDecoration: "none" }}
+                    >
+                      {site.contactPhone}
+                    </a>
+                  </li>
+                )}
+                {site?.contactEmail && (
+                  <li style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <Mail style={{ width: 15, height: 15, color: "#06b6d4", flexShrink: 0 }} />
+                    <a
+                      href={`mailto:${site.contactEmail}`}
+                      style={{ fontSize: 13, color: "#94a3b8", textDecoration: "none" }}
+                    >
+                      {site.contactEmail}
+                    </a>
+                  </li>
+                )}
+                {site?.contactAddress && (
+                  <li style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                    <MapPin
+                      style={{ width: 15, height: 15, color: "#06b6d4", flexShrink: 0, marginTop: 2 }}
+                    />
+                    <span style={{ fontSize: 13, color: "#94a3b8", whiteSpace: "pre-line" }}>
+                      {site.contactAddress}
+                    </span>
+                  </li>
+                )}
+              </ul>
+            </div>
+          )}
         </div>
 
         <div
@@ -1193,7 +1467,8 @@ function SiteFooter({ t }: { t: T }) {
           }}
         >
           <span style={{ fontSize: 12, color: "#334155" }}>
-            © {new Date().getFullYear()} {t.landing.footer}
+            {site?.footerText?.trim() ||
+              `© ${new Date().getFullYear()} ${t.landing.footer}`}
           </span>
           <span style={{ fontSize: 12, color: "#334155" }}>{t.landing.footerRights}</span>
         </div>

@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { EmployeeSidebar } from "@/components/employee/employee-sidebar";
 import { TopbarUserMenu } from "@/components/admin/topbar-user-menu";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { Footer } from "@/components/footer";
 import { useT } from "@/lib/i18n";
 
 function HeaderTitle({ pathname }: { pathname: string }) {
@@ -60,6 +61,7 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
           </div>
         </header>
         <div className="flex flex-1 flex-col">{children}</div>
+        <Footer />
       </SidebarInset>
     </SidebarProvider>
   );

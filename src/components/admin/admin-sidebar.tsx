@@ -12,11 +12,13 @@ import {
   GalleryHorizontalEnd,
   Layers,
   Briefcase,
+  Settings,
 } from "lucide-react";
 
 import { useAuthStore } from "@/stores/auth";
 import { authService } from "@/services/auth";
 import { siteConfig } from "@/config/site";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 import { useT } from "@/lib/i18n";
 import {
   Sidebar,
@@ -101,6 +103,16 @@ function useNavGroups() {
         },
       ],
     },
+    {
+      label: t.sidebar.system,
+      items: [
+        {
+          title: t.sidebar.settings,
+          href: "/admin/settings",
+          icon: Settings,
+        },
+      ],
+    },
   ];
 }
 
@@ -119,8 +131,10 @@ export function AdminSidebar() {
   const user = useAuthStore((s) => s.user);
   const refreshToken = useAuthStore((s) => s.refreshToken);
   const logoutStore = useAuthStore((s) => s.logout);
+  const { data: site } = useSiteSettings();
   const t = useT();
   const navGroups = useNavGroups();
+  const brandName = site?.brandName?.trim() || siteConfig.name;
 
   const handleLogout = async () => {
     try {
@@ -144,15 +158,24 @@ export function AdminSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
-              tooltip={siteConfig.name}
+              tooltip={brandName}
               render={<Link href="/admin/dashboard" />}
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <Building2 className="size-4" />
+              <div className="flex aspect-square size-8 items-center justify-center overflow-hidden rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                {site?.logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={site.logoUrl}
+                    alt={brandName}
+                    className="size-full object-contain"
+                  />
+                ) : (
+                  <Building2 className="size-4" />
+                )}
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  {siteConfig.name}
+                  {brandName}
                 </span>
                 <span className="truncate text-xs text-sidebar-foreground/60">
                   {t.app.adminConsole}

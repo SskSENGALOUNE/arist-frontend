@@ -14,6 +14,7 @@ import {
 import { useAuthStore } from "@/stores/auth";
 import { authService } from "@/services/auth";
 import { siteConfig } from "@/config/site";
+import { useSiteSettings } from "@/hooks/use-site-settings";
 import { useT } from "@/lib/i18n";
 import {
   Sidebar,
@@ -96,8 +97,10 @@ export function EmployeeSidebar() {
   const user = useAuthStore((s) => s.user);
   const refreshToken = useAuthStore((s) => s.refreshToken);
   const logoutStore = useAuthStore((s) => s.logout);
+  const { data: site } = useSiteSettings();
   const t = useT();
   const navGroups = useNavGroups();
+  const brandName = site?.brandName?.trim() || siteConfig.name;
 
   // Pick the single best (most specific) matching nav href so nested routes
   // like /business-trips/all don't also light up the /business-trips item.
@@ -135,15 +138,24 @@ export function EmployeeSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
-              tooltip={siteConfig.name}
+              tooltip={brandName}
               render={<Link href="/employee/dashboard" />}
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <Briefcase className="size-4" />
+              <div className="flex aspect-square size-8 items-center justify-center overflow-hidden rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                {site?.logoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={site.logoUrl}
+                    alt={brandName}
+                    className="size-full object-contain"
+                  />
+                ) : (
+                  <Briefcase className="size-4" />
+                )}
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  {siteConfig.name}
+                  {brandName}
                 </span>
                 <span className="truncate text-xs text-sidebar-foreground/60">
                   {t.sidebar.portal}
