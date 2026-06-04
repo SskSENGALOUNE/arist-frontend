@@ -9,6 +9,8 @@ import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { TopbarUserMenu } from "@/components/admin/topbar-user-menu";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { Footer } from "@/components/footer";
+import { Button } from "@/components/ui/button";
+import { Bell } from "lucide-react";
 import { useT } from "@/lib/i18n";
 
 function AdminHeaderTitle({ pathname }: { pathname: string }) {
@@ -59,6 +61,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <AdminHeaderTitle pathname={pathname} />
           <div className="ml-auto flex items-center gap-2">
             <LanguageSwitcher />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative rounded-full text-muted-foreground"
+              aria-label="Notifications"
+            >
+              <Bell className="size-4.5" />
+              <span className="absolute right-2 top-2 size-1.5 rounded-full bg-primary" />
+            </Button>
             <TopbarUserMenu />
           </div>
         </header>

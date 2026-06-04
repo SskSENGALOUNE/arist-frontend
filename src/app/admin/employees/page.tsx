@@ -13,6 +13,10 @@ import {
   ChevronUp,
   ChevronDown,
   KeyRound,
+  Users,
+  UserCheck,
+  UserX,
+  ShieldCheck,
 } from "lucide-react";
 import {
   employeeService,
@@ -20,6 +24,7 @@ import {
   type ListUsersParams,
 } from "@/services/employee";
 import { useT, useLocaleStore } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -115,26 +120,60 @@ export default function EmployeesPage() {
     queryFn: () => employeeService.list(params),
   });
 
+  // Stats — fetch a wide page once and aggregate client-side (no isActive
+  // filter on the API). Accurate while total <= 1000.
+  const { data: statsData } = useQuery({
+    queryKey: ["employee-stats"],
+    queryFn: () => employeeService.list({ page: 1, limit: 1000 }),
+  });
+
+  const stats = (() => {
+    const items = statsData?.items ?? [];
+    const total = statsData?.pagination.total ?? items.length;
+    const active = items.filter((e) => e.isActive).length;
+    const admins = items.filter((e) => e.role === "ADMIN").length;
+    return { total, active, inactive: items.length - active, admins };
+  })();
+
+  const statCards = [
+    { label: t.employees.statsAll, value: stats.total, icon: Users, tint: "text-primary bg-primary/10" },
+    { label: t.employees.statsActive, value: stats.active, icon: UserCheck, tint: "text-emerald-600 bg-emerald-50" },
+    { label: t.employees.statsInactive, value: stats.inactive, icon: UserX, tint: "text-red-600 bg-red-50" },
+    { label: t.employees.statsAdmins, value: stats.admins, icon: ShieldCheck, tint: "text-amber-600 bg-amber-50" },
+  ];
+
   const createMutation = useMutation({
     mutationFn: employeeService.create,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["employees"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
+      queryClient.invalidateQueries({ queryKey: ["employee-stats"] });
+    },
   });
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) =>
       employeeService.update(id, data),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["employees"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
+      queryClient.invalidateQueries({ queryKey: ["employee-stats"] });
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: employeeService.delete,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["employees"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
+      queryClient.invalidateQueries({ queryKey: ["employee-stats"] });
+    },
   });
 
   const resetPasswordMutation = useMutation({
     mutationFn: ({ id, newPassword }: { id: string; newPassword: string }) =>
       employeeService.resetPassword(id, newPassword),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["employees"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["employees"] });
+      queryClient.invalidateQueries({ queryKey: ["employee-stats"] });
+    },
   });
 
   const handleSearch = () => {
@@ -172,15 +211,54 @@ export default function EmployeesPage() {
   const pagination = data?.pagination;
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col bg-muted/40">
       <div className="p-6">
-        <div className="mb-4 flex items-center justify-between gap-3">
+        {/* Heading */}
+        <div className="mb-5">
+          <h2 className="text-xl font-semibold tracking-tight">
+            {t.employees.title}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {t.employees.subtitle}
+          </p>
+        </div>
+
+        {/* Stats */}
+        <div className="mb-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {statCards.map((card) => (
+            <div
+              key={card.label}
+              className="flex items-center justify-between rounded-xl border bg-background p-4 shadow-sm"
+            >
+              <div>
+                <p className="text-sm text-muted-foreground">{card.label}</p>
+                <p className="mt-1 text-2xl font-semibold tracking-tight">
+                  {card.value}
+                  <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+                    {t.employees.peopleUnit}
+                  </span>
+                </p>
+              </div>
+              <div
+                className={cn(
+                  "flex size-11 items-center justify-center rounded-full",
+                  card.tint,
+                )}
+              >
+                <card.icon className="size-5" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Toolbar */}
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-background p-3 shadow-sm">
           <div className="flex items-center gap-2">
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder={t.employees.searchPlaceholder}
-                className="w-64 pl-8"
+                className="w-72 pl-8"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -202,7 +280,16 @@ export default function EmployeesPage() {
           </Button>
         </div>
 
-        <div className="rounded-xl border bg-background">
+        {/* Table card */}
+        <div className="rounded-xl border bg-background shadow-sm">
+          <div className="flex items-center gap-6 border-b px-4">
+            <button
+              type="button"
+              className="-mb-px border-b-2 border-primary py-3 text-sm font-medium text-foreground"
+            >
+              {t.employees.allEmployees}
+            </button>
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -288,13 +375,18 @@ export default function EmployeesPage() {
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge
-                        variant={emp.isActive ? "outline" : "destructive"}
+                      <span
+                        className={cn(
+                          "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+                          emp.isActive
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-red-50 text-red-700",
+                        )}
                       >
                         {emp.isActive
                           ? t.employees.statusActive
                           : t.employees.statusInactive}
-                      </Badge>
+                      </span>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {emp.lastLoginAt ? (
@@ -353,8 +445,8 @@ export default function EmployeesPage() {
             </TableBody>
           </Table>
 
-          {pagination && pagination.totalPages > 1 && (
-            <div className="flex items-center justify-between border-t px-4 py-3">
+          {pagination && (
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3">
               <p className="text-sm text-muted-foreground">
                 {t.employees.pageInfo(
                   pagination.page,
@@ -362,27 +454,51 @@ export default function EmployeesPage() {
                   pagination.total,
                 )}
               </p>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="icon-xs"
-                  disabled={!pagination.hasPrev}
-                  onClick={() =>
-                    setParams((prev) => ({ ...prev, page: (prev.page ?? 1) - 1 }))
-                  }
-                >
-                  <ChevronLeft className="size-3.5" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon-xs"
-                  disabled={!pagination.hasNext}
-                  onClick={() =>
-                    setParams((prev) => ({ ...prev, page: (prev.page ?? 1) + 1 }))
-                  }
-                >
-                  <ChevronRight className="size-3.5" />
-                </Button>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {t.employees.rowsPerPage}
+                  </span>
+                  <select
+                    value={params.limit}
+                    onChange={(e) =>
+                      setParams((prev) => ({
+                        ...prev,
+                        page: 1,
+                        limit: Number(e.target.value),
+                      }))
+                    }
+                    className="h-8 rounded-md border bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {[10, 20, 50].map((n) => (
+                      <option key={n} value={n}>
+                        {n}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="icon-xs"
+                    disabled={!pagination.hasPrev}
+                    onClick={() =>
+                      setParams((prev) => ({ ...prev, page: (prev.page ?? 1) - 1 }))
+                    }
+                  >
+                    <ChevronLeft className="size-3.5" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon-xs"
+                    disabled={!pagination.hasNext}
+                    onClick={() =>
+                      setParams((prev) => ({ ...prev, page: (prev.page ?? 1) + 1 }))
+                    }
+                  >
+                    <ChevronRight className="size-3.5" />
+                  </Button>
+                </div>
               </div>
             </div>
           )}
