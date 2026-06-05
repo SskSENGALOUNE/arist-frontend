@@ -4,14 +4,24 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  Plane,
+  Clock,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 import { adminBusinessTripService } from "@/services/business-trip";
 import type {
   BusinessTrip,
   ListBusinessTripsParams,
   TripStatus,
 } from "@/types/business-trip";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -33,18 +43,16 @@ function formatDestination(trip: BusinessTrip): string {
     : "—";
 }
 
-function statusVariant(
-  status: TripStatus,
-): "default" | "outline" | "secondary" | "destructive" {
+function statusPillClass(status: TripStatus): string {
   switch (status) {
     case "VERIFIED":
-      return "default";
+      return "bg-emerald-50 text-emerald-700";
     case "REJECTED":
-      return "destructive";
-    case "DRAFT":
-      return "secondary";
+      return "bg-red-50 text-red-700";
     case "PENDING":
-      return "outline";
+      return "bg-amber-50 text-amber-700";
+    case "DRAFT":
+      return "bg-muted text-muted-foreground";
   }
 }
 
@@ -64,26 +72,106 @@ export default function AdminBusinessTripsPage() {
     sortOrder: "desc",
   });
 
+  const [search, setSearch] = useState("");
+
   const { data, isLoading } = useQuery({
     queryKey: ["admin-business-trips", params],
     queryFn: () => adminBusinessTripService.list(params),
   });
 
+  const { data: statsData } = useQuery({
+    queryKey: ["admin-business-trips-stats"],
+    queryFn: adminBusinessTripService.getStats,
+  });
+
+  const handleSearch = () => {
+    setParams((prev) => ({ ...prev, page: 1, search: search || undefined }));
+  };
+
+  const stats = {
+    total: statsData?.total ?? 0,
+    pending: statsData?.pending ?? 0,
+    verified: statsData?.verified ?? 0,
+    rejected: statsData?.rejected ?? 0,
+  };
+
+  const statCards = [
+    { label: "All", value: stats.total, icon: Plane, tint: "text-primary bg-primary/10" },
+    { label: "Pending", value: stats.pending, icon: Clock, tint: "text-amber-600 bg-amber-50" },
+    { label: "Verified", value: stats.verified, icon: CheckCircle2, tint: "text-emerald-600 bg-emerald-50" },
+    { label: "Rejected", value: stats.rejected, icon: XCircle, tint: "text-red-600 bg-red-50" },
+  ];
+
   const pagination = data?.pagination;
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col bg-muted/40">
       <div className="p-6">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-semibold">All Business Trips</h2>
-            <p className="text-sm text-muted-foreground">
-              Review and verify business trips submitted by employees.
-            </p>
-          </div>
+        {/* Heading */}
+        <div className="mb-5">
+          <h2 className="text-xl font-semibold tracking-tight">
+            All Business Trips
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Review and verify business trips submitted by employees.
+          </p>
         </div>
 
-        <div className="rounded-xl border bg-background">
+        {/* Stats */}
+        <div className="mb-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {statCards.map((card) => (
+            <div
+              key={card.label}
+              className="flex items-center justify-between rounded-xl border bg-background p-4 shadow-sm"
+            >
+              <div>
+                <p className="text-sm text-muted-foreground">{card.label}</p>
+                <p className="mt-1 text-2xl font-semibold tracking-tight">
+                  {card.value}
+                  <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+                    Trips
+                  </span>
+                </p>
+              </div>
+              <div
+                className={cn(
+                  "flex size-11 items-center justify-center rounded-full",
+                  card.tint,
+                )}
+              >
+                <card.icon className="size-5" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Toolbar */}
+        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border bg-background p-3 shadow-sm">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search by employee or title..."
+              className="w-72 pl-8"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            />
+          </div>
+          <Button variant="outline" size="sm" onClick={handleSearch}>
+            Search
+          </Button>
+        </div>
+
+        {/* Table card */}
+        <div className="rounded-xl border bg-background shadow-sm">
+          <div className="flex items-center gap-6 border-b px-4">
+            <button
+              type="button"
+              className="-mb-px border-b-2 border-primary py-3 text-sm font-medium text-foreground"
+            >
+              All trips
+            </button>
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -139,9 +227,14 @@ export default function AdminBusinessTripsPage() {
                       {format(new Date(trip.returnDate), "yyyy-MM-dd")}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={statusVariant(trip.status)}>
+                      <span
+                        className={cn(
+                          "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+                          statusPillClass(trip.status),
+                        )}
+                      >
                         {trip.status}
-                      </Badge>
+                      </span>
                     </TableCell>
                   </TableRow>
                 ))
@@ -149,39 +242,63 @@ export default function AdminBusinessTripsPage() {
             </TableBody>
           </Table>
 
-          {pagination && pagination.totalPages > 1 && (
-            <div className="flex items-center justify-between border-t px-4 py-3">
+          {pagination && (
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3">
               <p className="text-sm text-muted-foreground">
                 Page {pagination.page} of {pagination.totalPages} —{" "}
                 {pagination.total} total
               </p>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="icon-xs"
-                  disabled={!pagination.hasPrev}
-                  onClick={() =>
-                    setParams((prev) => ({
-                      ...prev,
-                      page: (prev.page ?? 1) - 1,
-                    }))
-                  }
-                >
-                  <ChevronLeft className="size-3.5" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon-xs"
-                  disabled={!pagination.hasNext}
-                  onClick={() =>
-                    setParams((prev) => ({
-                      ...prev,
-                      page: (prev.page ?? 1) + 1,
-                    }))
-                  }
-                >
-                  <ChevronRight className="size-3.5" />
-                </Button>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    Rows per page
+                  </span>
+                  <select
+                    value={params.limit}
+                    onChange={(e) =>
+                      setParams((prev) => ({
+                        ...prev,
+                        page: 1,
+                        limit: Number(e.target.value),
+                      }))
+                    }
+                    className="h-8 rounded-md border bg-background px-2 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {[10, 20, 50].map((n) => (
+                      <option key={n} value={n}>
+                        {n}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="icon-xs"
+                    disabled={!pagination.hasPrev}
+                    onClick={() =>
+                      setParams((prev) => ({
+                        ...prev,
+                        page: (prev.page ?? 1) - 1,
+                      }))
+                    }
+                  >
+                    <ChevronLeft className="size-3.5" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon-xs"
+                    disabled={!pagination.hasNext}
+                    onClick={() =>
+                      setParams((prev) => ({
+                        ...prev,
+                        page: (prev.page ?? 1) + 1,
+                      }))
+                    }
+                  >
+                    <ChevronRight className="size-3.5" />
+                  </Button>
+                </div>
               </div>
             </div>
           )}

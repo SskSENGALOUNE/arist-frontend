@@ -73,6 +73,51 @@ export interface ListBusinessTripsParams {
   limit?: number;
   sortBy?: string;
   sortOrder?: "asc" | "desc";
+  search?: string;
+}
+
+export interface BusinessTripStats {
+  total: number;
+  pending: number;
+  verified: number;
+  rejected: number;
+  draft: number;
+}
+
+export interface DestinationStat {
+  name: string;
+  count: number;
+}
+
+export interface DestinationStats {
+  topCountries: DestinationStat[];
+  topProvinces: DestinationStat[];
+}
+
+export interface TravelerStat {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  tripCount: number;
+}
+
+export interface ListTopTravelersParams {
+  page?: number;
+  limit?: number;
+  tripType?: TripType;
+}
+
+export interface PaginatedTravelers {
+  items: TravelerStat[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
 }
 
 export interface PaginatedBusinessTrips {

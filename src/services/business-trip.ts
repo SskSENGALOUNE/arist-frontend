@@ -2,6 +2,10 @@ import { api } from "./api";
 import type { BaseApiResponse } from "@/types";
 import type {
   BusinessTrip,
+  BusinessTripStats,
+  DestinationStats,
+  ListTopTravelersParams,
+  PaginatedTravelers,
   CreateBusinessTripData,
   UpdateBusinessTripData,
   ListBusinessTripsParams,
@@ -80,6 +84,30 @@ export const adminBusinessTripService = {
   ): Promise<PaginatedBusinessTrips> => {
     const response = await api.get<BaseApiResponse<PaginatedBusinessTrips>>(
       "/admin/business-trips",
+      { params },
+    );
+    return response.data.data!;
+  },
+
+  getStats: async (): Promise<BusinessTripStats> => {
+    const response = await api.get<BaseApiResponse<BusinessTripStats>>(
+      "/admin/business-trips/stats",
+    );
+    return response.data.data!;
+  },
+
+  getDestinationStats: async (): Promise<DestinationStats> => {
+    const response = await api.get<BaseApiResponse<DestinationStats>>(
+      "/admin/business-trips/destination-stats",
+    );
+    return response.data.data!;
+  },
+
+  getTopTravelers: async (
+    params?: ListTopTravelersParams,
+  ): Promise<PaginatedTravelers> => {
+    const response = await api.get<BaseApiResponse<PaginatedTravelers>>(
+      "/admin/business-trips/top-travelers",
       { params },
     );
     return response.data.data!;

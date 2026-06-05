@@ -79,11 +79,25 @@ export interface UpdateEmployeeData {
   positionId?: string | null;
 }
 
+export interface EmployeeStats {
+  total: number;
+  active: number;
+  inactive: number;
+  admins: number;
+}
+
 export const employeeService = {
   list: async (params?: ListUsersParams): Promise<PaginatedUsers> => {
     const response = await api.get<BaseApiResponse<PaginatedUsers>>(
       "/admin/users",
       { params },
+    );
+    return response.data.data!;
+  },
+
+  getStats: async (): Promise<EmployeeStats> => {
+    const response = await api.get<BaseApiResponse<EmployeeStats>>(
+      "/admin/users/stats",
     );
     return response.data.data!;
   },

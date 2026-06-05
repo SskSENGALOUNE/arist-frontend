@@ -1,25 +1,25 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  ArrowRight,
   ShieldCheck,
   UserCheck,
   Users,
   UserX,
+  Globe,
+  MapPin,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { employeeService } from "@/services/employee";
+import { adminBusinessTripService } from "@/services/business-trip";
+import type { DestinationStat, TripType } from "@/types/business-trip";
 import { useAuthStore } from "@/stores/auth";
 import { useT } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -31,61 +31,87 @@ function formatDate(iso: string) {
   });
 }
 
+/** "VIENTIANE_CAPITAL" → "Vientiane Capital" */
+function formatPlace(name: string) {
+  return name
+    .toLowerCase()
+    .split("_")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+function getInitials(firstName?: string, lastName?: string) {
+  const fi = firstName?.trim()?.[0] ?? "";
+  const li = lastName?.trim()?.[0] ?? "";
+  return `${fi}${li}`.toUpperCase() || "AR";
+}
+
 export default function AdminDashboardPage() {
   const user = useAuthStore((s) => s.user);
   const t = useT();
 
-  const allQuery = useQuery({
-    queryKey: ["dashboard", "all"],
-    queryFn: () => employeeService.list({ page: 1, limit: 100 }),
+  const statsQuery = useQuery({
+    queryKey: ["dashboard", "stats"],
+    queryFn: employeeService.getStats,
   });
 
-  const recentQuery = useQuery({
-    queryKey: ["dashboard", "recent"],
+  const [travelerFilter, setTravelerFilter] = useState<TripType | "ALL">("ALL");
+  const [travelerPage, setTravelerPage] = useState(1);
+
+  const travelersQuery = useQuery({
+    queryKey: ["dashboard", "top-travelers", travelerFilter, travelerPage],
     queryFn: () =>
-      employeeService.list({
-        page: 1,
+      adminBusinessTripService.getTopTravelers({
+        page: travelerPage,
         limit: 5,
-        sortBy: "createdAt",
-        sortOrder: "desc",
+        tripType: travelerFilter === "ALL" ? undefined : travelerFilter,
       }),
   });
 
-  const items = allQuery.data?.items ?? [];
-  const total = allQuery.data?.pagination.total ?? 0;
-  const active = items.filter((u) => u.isActive).length;
-  const inactive = items.filter((u) => !u.isActive).length;
-  const admins = items.filter((u) => u.role === "ADMIN").length;
+  const travelerTabs: { key: TripType | "ALL"; label: string }[] = [
+    { key: "ALL", label: t.dashboard.filterAll },
+    { key: "INTERNATIONAL", label: t.dashboard.filterInternational },
+    { key: "DOMESTIC", label: t.dashboard.filterDomestic },
+  ];
+  const travelers = travelersQuery.data?.items ?? [];
+  const travelerMax = travelers.reduce((m, tr) => Math.max(m, tr.tripCount), 0) || 1;
+  const travelerPagination = travelersQuery.data?.pagination;
 
-  const stats = [
+  const destinationQuery = useQuery({
+    queryKey: ["dashboard", "destination-stats"],
+    queryFn: adminBusinessTripService.getDestinationStats,
+  });
+
+  const s = statsQuery.data;
+  const statCards = [
     {
       label: t.dashboard.totalEmployees,
-      value: total,
+      value: s?.total ?? 0,
       icon: Users,
-      hint: t.dashboard.totalEmployeesHint,
+      tint: "text-primary bg-primary/10",
     },
     {
       label: t.dashboard.active,
-      value: active,
+      value: s?.active ?? 0,
       icon: UserCheck,
-      hint: t.dashboard.activeHint,
+      tint: "text-emerald-600 bg-emerald-50",
     },
     {
       label: t.dashboard.inactive,
-      value: inactive,
+      value: s?.inactive ?? 0,
       icon: UserX,
-      hint: t.dashboard.inactiveHint,
+      tint: "text-red-600 bg-red-50",
     },
     {
       label: t.dashboard.administrators,
-      value: admins,
+      value: s?.admins ?? 0,
       icon: ShieldCheck,
-      hint: t.dashboard.administratorsHint,
+      tint: "text-amber-600 bg-amber-50",
     },
   ];
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-6">
+    <div className="flex flex-1 flex-col gap-6 bg-muted/40 p-6">
       <div className="flex flex-col gap-1">
         <h2 className="text-2xl font-semibold tracking-tight">
           {t.dashboard.welcomeBack(user?.firstName)}
@@ -94,86 +120,237 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {stats.map((s) => (
-          <Card key={s.label} size="sm">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardDescription>{s.label}</CardDescription>
-                <s.icon className="size-4 text-muted-foreground" />
-              </div>
-              <CardTitle className="text-2xl font-semibold">
-                {allQuery.isLoading ? (
+        {statCards.map((card) => (
+          <div
+            key={card.label}
+            className="flex items-center justify-between rounded-xl border bg-background p-4 shadow-sm"
+          >
+            <div>
+              <p className="text-sm text-muted-foreground">{card.label}</p>
+              <div className="mt-1 text-2xl font-semibold tracking-tight">
+                {statsQuery.isLoading ? (
                   <Skeleton className="h-7 w-12" />
                 ) : (
-                  s.value
+                  <>
+                    {card.value}
+                    <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+                      {t.dashboard.peopleUnit}
+                    </span>
+                  </>
                 )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-xs text-muted-foreground">{s.hint}</p>
-            </CardContent>
-          </Card>
+              </div>
+            </div>
+            <div className={cn("flex size-11 items-center justify-center rounded-full", card.tint)}>
+              <card.icon className="size-5" />
+            </div>
+          </div>
         ))}
       </div>
 
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <RankList
+          title={t.dashboard.topCountries}
+          description={t.dashboard.topCountriesDescription}
+          icon={Globe}
+          items={destinationQuery.data?.topCountries ?? []}
+          isLoading={destinationQuery.isLoading}
+          emptyLabel={t.dashboard.noTripData}
+          unit={t.dashboard.tripsUnit}
+        />
+        <RankList
+          title={t.dashboard.topProvinces}
+          description={t.dashboard.topProvincesDescription}
+          icon={MapPin}
+          items={destinationQuery.data?.topProvinces ?? []}
+          isLoading={destinationQuery.isLoading}
+          emptyLabel={t.dashboard.noTripData}
+          unit={t.dashboard.tripsUnit}
+        />
+      </div>
+
       <Card>
-        <CardHeader className="flex-row items-center justify-between border-b pb-4">
-          <div>
-            <CardTitle>{t.dashboard.recentEmployees}</CardTitle>
-            <CardDescription>
-              {t.dashboard.recentEmployeesDescription}
-            </CardDescription>
+        <CardHeader className="border-b pb-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle>{t.dashboard.topTravelers}</CardTitle>
+              <CardDescription>
+                {t.dashboard.topTravelersDescription}
+              </CardDescription>
+            </div>
+            {/* Filter tabs */}
+            <div className="inline-flex rounded-lg border bg-muted/50 p-0.5">
+              {travelerTabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => {
+                    setTravelerFilter(tab.key);
+                    setTravelerPage(1);
+                  }}
+                  className={cn(
+                    "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                    travelerFilter === tab.key
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            nativeButton={false}
-            render={<Link href="/admin/employees" />}
-          >
-            {t.dashboard.viewAll}
-            <ArrowRight className="size-3.5" />
-          </Button>
         </CardHeader>
         <CardContent className="p-0">
-          {recentQuery.isLoading ? (
+          {travelersQuery.isLoading ? (
             <div className="flex flex-col gap-3 p-4">
-              {Array.from({ length: 4 }).map((_, i) => (
+              {Array.from({ length: 5 }).map((_, i) => (
                 <Skeleton key={i} className="h-10 w-full" />
               ))}
             </div>
-          ) : !recentQuery.data?.items.length ? (
+          ) : !travelers.length ? (
             <p className="px-4 py-8 text-center text-sm text-muted-foreground">
-              {t.dashboard.noEmployees}
+              {t.dashboard.noTravelers}
             </p>
           ) : (
-            <ul className="divide-y">
-              {recentQuery.data.items.map((emp) => (
+            <ul>
+              {travelers.map((tr, i) => (
                 <li
-                  key={emp.id}
-                  className="flex items-center justify-between gap-4 px-4 py-3"
+                  key={tr.userId}
+                  className="flex items-center gap-3 border-b px-4 py-2.5 last:border-b-0"
                 >
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium">
-                      {emp.firstName} {emp.lastName}
-                    </p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {emp.email}
-                    </p>
-                  </div>
-                  <Badge
-                    variant={emp.role === "ADMIN" ? "default" : "secondary"}
-                  >
-                    {emp.role}
-                  </Badge>
-                  <span className="hidden text-xs text-muted-foreground sm:inline">
-                    {formatDate(emp.createdAt)}
+                  <span className="w-4 shrink-0 text-sm font-semibold text-muted-foreground">
+                    {(travelerPagination?.page
+                      ? (travelerPagination.page - 1) * travelerPagination.limit
+                      : 0) +
+                      i +
+                      1}
                   </span>
+                  <div className="flex size-[30px] shrink-0 items-center justify-center rounded-full bg-primary/10 text-[11px] font-medium text-primary">
+                    {getInitials(tr.firstName, tr.lastName)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1 flex items-center justify-between gap-2">
+                      <p className="truncate text-[13px] font-medium">
+                        {tr.firstName} {tr.lastName}
+                      </p>
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {tr.tripCount} {t.dashboard.tripsUnit}
+                      </span>
+                    </div>
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full bg-primary"
+                        style={{ width: `${(tr.tripCount / travelerMax) * 100}%` }}
+                      />
+                    </div>
+                  </div>
                 </li>
               ))}
             </ul>
           )}
+
+          {travelerPagination && travelerPagination.totalPages > 1 && (
+            <div className="flex items-center justify-between border-t px-4 py-3">
+              <p className="text-sm text-muted-foreground">
+                {t.employees.pageInfo(
+                  travelerPagination.page,
+                  travelerPagination.totalPages,
+                  travelerPagination.total,
+                )}
+              </p>
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="icon-xs"
+                  disabled={!travelerPagination.hasPrev}
+                  onClick={() => setTravelerPage((p) => p - 1)}
+                >
+                  <ChevronLeft className="size-3.5" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon-xs"
+                  disabled={!travelerPagination.hasNext}
+                  onClick={() => setTravelerPage((p) => p + 1)}
+                >
+                  <ChevronRight className="size-3.5" />
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function RankList({
+  title,
+  description,
+  icon: Icon,
+  items,
+  isLoading,
+  emptyLabel,
+  unit,
+}: {
+  title: string;
+  description: string;
+  icon: React.ElementType;
+  items: DestinationStat[];
+  isLoading: boolean;
+  emptyLabel: string;
+  unit: string;
+}) {
+  const max = items.reduce((m, it) => Math.max(m, it.count), 0) || 1;
+
+  return (
+    <Card>
+      <CardHeader className="border-b pb-4">
+        <div className="flex items-center gap-2">
+          <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Icon className="size-4" />
+          </span>
+          <div>
+            <CardTitle className="text-base">{title}</CardTitle>
+            <CardDescription>{description}</CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="p-4">
+        {isLoading ? (
+          <div className="flex flex-col gap-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-7 w-full" />
+            ))}
+          </div>
+        ) : !items.length ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">{emptyLabel}</p>
+        ) : (
+          <ol className="flex flex-col gap-3">
+            {items.map((item, i) => (
+              <li key={item.name} className="flex items-center gap-3">
+                <span className="w-4 shrink-0 text-sm font-semibold text-muted-foreground">
+                  {i + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex items-center justify-between gap-2">
+                    <span className="truncate text-sm font-medium">{formatPlace(item.name)}</span>
+                    <span className="shrink-0 text-xs text-muted-foreground">
+                      {item.count} {unit}
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-primary"
+                      style={{ width: `${(item.count / max) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ol>
+        )}
+      </CardContent>
+    </Card>
   );
 }

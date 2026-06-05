@@ -2,13 +2,22 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Search,
+  Layers,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 import { toast } from "sonner";
 import { departmentService } from "@/services/department";
 import type { Department } from "@/types/department";
 import { useT } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import {
   Table,
@@ -37,11 +46,36 @@ export default function DepartmentsPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleting, setDeleting] = useState<Department | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [search, setSearch] = useState("");
 
   const { data: departments = [], isLoading } = useQuery({
     queryKey: ["departments"],
     queryFn: () => departmentService.list(),
   });
+
+  const filtered = departments.filter((d) =>
+    d.name.toLowerCase().includes(search.trim().toLowerCase()),
+  );
+  const stats = [
+    {
+      label: t.departments.statsTotal,
+      value: departments.length,
+      icon: Layers,
+      tint: "text-primary bg-primary/10",
+    },
+    {
+      label: t.departments.active,
+      value: departments.filter((d) => d.isActive).length,
+      icon: CheckCircle2,
+      tint: "text-emerald-600 bg-emerald-50",
+    },
+    {
+      label: t.departments.inactive,
+      value: departments.filter((d) => !d.isActive).length,
+      icon: XCircle,
+      tint: "text-red-600 bg-red-50",
+    },
+  ];
 
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: ["departments"] });
@@ -85,12 +119,17 @@ export default function DepartmentsPage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col bg-muted/40">
       <div className="p-6">
-        <div className="mb-4 flex items-center justify-between gap-3">
+        {/* Heading */}
+        <div className="mb-5 flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold">{t.departments.heading}</h2>
-            <p className="text-sm text-muted-foreground">{t.departments.subheading}</p>
+            <h2 className="text-xl font-semibold tracking-tight">
+              {t.departments.heading}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {t.departments.subheading}
+            </p>
           </div>
           <Button
             size="sm"
@@ -101,7 +140,57 @@ export default function DepartmentsPage() {
           </Button>
         </div>
 
-        <div className="rounded-xl border bg-background">
+        {/* Stats */}
+        <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {stats.map((card) => (
+            <div
+              key={card.label}
+              className="flex items-center justify-between rounded-xl border bg-background p-4 shadow-sm"
+            >
+              <div>
+                <p className="text-sm text-muted-foreground">{card.label}</p>
+                <p className="mt-1 text-2xl font-semibold tracking-tight">
+                  {card.value}
+                  <span className="ml-1.5 text-xs font-normal text-muted-foreground">
+                    {t.departments.unit}
+                  </span>
+                </p>
+              </div>
+              <div
+                className={cn(
+                  "flex size-11 items-center justify-center rounded-full",
+                  card.tint,
+                )}
+              >
+                <card.icon className="size-5" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Toolbar */}
+        <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border bg-background p-3 shadow-sm">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder={t.departments.searchPlaceholder}
+              className="w-72 pl-8"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Table card */}
+        <div className="rounded-xl border bg-background shadow-sm">
+          <div className="flex items-center gap-6 border-b px-4">
+            <button
+              type="button"
+              className="-mb-px border-b-2 border-primary py-3 text-sm font-medium text-foreground"
+            >
+              {t.departments.allDepartments}
+            </button>
+          </div>
           <Table>
             <TableHeader>
               <TableRow>
@@ -117,14 +206,14 @@ export default function DepartmentsPage() {
                     {t.common.loading}
                   </TableCell>
                 </TableRow>
-              ) : !departments.length ? (
+              ) : !filtered.length ? (
                 <TableRow>
                   <TableCell colSpan={3} className="py-8 text-center text-muted-foreground">
-                    {t.departments.empty}
+                    {search ? t.departments.noMatch : t.departments.empty}
                   </TableCell>
                 </TableRow>
               ) : (
-                departments.map((dept) => (
+                filtered.map((dept) => (
                   <TableRow key={dept.id}>
                     <TableCell className="font-medium">{dept.name}</TableCell>
                     <TableCell>
@@ -137,9 +226,16 @@ export default function DepartmentsPage() {
                           }
                           disabled={updateMutation.isPending}
                         />
-                        <Badge variant={dept.isActive ? "outline" : "secondary"}>
+                        <span
+                          className={cn(
+                            "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+                            dept.isActive
+                              ? "bg-emerald-50 text-emerald-700"
+                              : "bg-muted text-muted-foreground",
+                          )}
+                        >
                           {dept.isActive ? t.departments.active : t.departments.inactive}
-                        </Badge>
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell className="text-right">

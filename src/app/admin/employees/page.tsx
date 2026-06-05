@@ -120,20 +120,18 @@ export default function EmployeesPage() {
     queryFn: () => employeeService.list(params),
   });
 
-  // Stats — fetch a wide page once and aggregate client-side (no isActive
-  // filter on the API). Accurate while total <= 1000.
+  // Stats — dedicated backend endpoint returns accurate counts.
   const { data: statsData } = useQuery({
     queryKey: ["employee-stats"],
-    queryFn: () => employeeService.list({ page: 1, limit: 1000 }),
+    queryFn: employeeService.getStats,
   });
 
-  const stats = (() => {
-    const items = statsData?.items ?? [];
-    const total = statsData?.pagination.total ?? items.length;
-    const active = items.filter((e) => e.isActive).length;
-    const admins = items.filter((e) => e.role === "ADMIN").length;
-    return { total, active, inactive: items.length - active, admins };
-  })();
+  const stats = {
+    total: statsData?.total ?? 0,
+    active: statsData?.active ?? 0,
+    inactive: statsData?.inactive ?? 0,
+    admins: statsData?.admins ?? 0,
+  };
 
   const statCards = [
     { label: t.employees.statsAll, value: stats.total, icon: Users, tint: "text-primary bg-primary/10" },
