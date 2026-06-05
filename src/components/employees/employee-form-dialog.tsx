@@ -17,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { EmployeeUser } from "@/services/employee";
-import type { Gender } from "@/types";
 import { departmentService } from "@/services/department";
 import { positionService } from "@/services/position";
 import { useT } from "@/lib/i18n";
@@ -55,7 +54,7 @@ type CreateFormValues = {
   firstName: string;
   lastName: string;
   role: "ADMIN" | "EMPLOYEE";
-  gender?: Gender | "";
+  gender: "MALE" | "FEMALE";
   departmentId?: string;
   positionId?: string;
 };
@@ -109,8 +108,8 @@ export function EmployeeFormDialog({
       password: "",
       firstName: "",
       lastName: "",
-      role: "EMPLOYEE",
-      gender: "",
+      role: "EMPLOYEE" as const,
+      gender: undefined,
       departmentId: "",
       positionId: "",
     },
@@ -145,7 +144,8 @@ export function EmployeeFormDialog({
     }
   }, [employee, open]);
 
-  const form = isEdit ? editForm : createForm;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const form = (isEdit ? editForm : createForm) as ReturnType<typeof useForm<any>>;
   const { formState: { errors, isSubmitting } } = form;
 
   const handleSubmit = form.handleSubmit(async (data) => {
