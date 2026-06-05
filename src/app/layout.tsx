@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Lato, Geist_Mono } from "next/font/google";
+import { Noto_Sans_Lao, Geist_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 
-const lato = Lato({
-  variable: "--font-lato",
-  subsets: ["latin"],
-  weight: ["100", "300", "400", "700", "900"],
+const notoSansLao = Noto_Sans_Lao({
+  variable: "--font-noto-sans-lao",
+  subsets: ["lao"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   display: "swap",
 });
 
@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${lato.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${notoSansLao.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Providers>{children}</Providers>

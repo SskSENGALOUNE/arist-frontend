@@ -9,8 +9,10 @@ import {
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ImageIcon, Loader2, Plus, Trash2, Upload, X } from "lucide-react";
+import { ALargeSmall, ImageIcon, Loader2, Plus, Trash2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
+import { useSettingsStore, FONT_SIZE_PX, type FontSize } from "@/stores/settings";
+import { cn } from "@/lib/utils";
 import {
   adminSiteSettingService,
   siteSettingService,
@@ -53,9 +55,18 @@ function buildSchema(t: ReturnType<typeof useT>) {
 
 type SettingsFormValues = z.infer<ReturnType<typeof buildSchema>>;
 
+const SIZE_OPTIONS: { value: FontSize; label: string; desc: string }[] = [
+  { value: "sm", label: "S", desc: "18px" },
+  { value: "md", label: "M", desc: "20px" },
+  { value: "lg", label: "L", desc: "22px" },
+  { value: "xl", label: "XL", desc: "25px" },
+];
+
 export default function AdminSiteSettingsPage() {
   const t = useT();
   const queryClient = useQueryClient();
+  const fontSize = useSettingsStore((s) => s.fontSize);
+  const setFontSize = useSettingsStore((s) => s.setFontSize);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -180,6 +191,40 @@ export default function AdminSiteSettingsPage() {
           </div>
         ) : (
           <form onSubmit={onSubmit} className="flex flex-col gap-6">
+            {/* ── Appearance ── */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <ALargeSmall className="size-4 text-muted-foreground" />
+                  ການສະແດງຜົນ
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm text-muted-foreground">ຂະໜາດຕົວໜັງສືທົ່ວໄປ</p>
+                  <div className="flex items-center gap-2">
+                    {SIZE_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => setFontSize(opt.value)}
+                        style={{ fontSize: FONT_SIZE_PX[opt.value] }}
+                        className={cn(
+                          "flex h-14 w-20 flex-col items-center justify-center gap-0.5 rounded-xl border-2 transition-all",
+                          fontSize === opt.value
+                            ? "border-primary bg-primary/8 text-primary"
+                            : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                        )}
+                      >
+                        <span className="font-semibold leading-none">ກ</span>
+                        <span className="text-[10px] leading-none opacity-70">{opt.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* ── Branding ── */}
             <Card>
               <CardHeader>

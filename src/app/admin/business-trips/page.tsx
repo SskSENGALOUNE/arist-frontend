@@ -12,6 +12,8 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
+  BookCheck,
+  BookX,
 } from "lucide-react";
 import { adminBusinessTripService } from "@/services/business-trip";
 import type {
@@ -93,13 +95,17 @@ export default function AdminBusinessTripsPage() {
     pending: statsData?.pending ?? 0,
     verified: statsData?.verified ?? 0,
     rejected: statsData?.rejected ?? 0,
+    withPassport: statsData?.passportStats?.withPassport ?? 0,
+    withoutPassport: statsData?.passportStats?.withoutPassport ?? 0,
   };
 
   const statCards = [
-    { label: "All", value: stats.total, icon: Plane, tint: "text-primary bg-primary/10" },
-    { label: "Pending", value: stats.pending, icon: Clock, tint: "text-amber-600 bg-amber-50" },
-    { label: "Verified", value: stats.verified, icon: CheckCircle2, tint: "text-emerald-600 bg-emerald-50" },
-    { label: "Rejected", value: stats.rejected, icon: XCircle, tint: "text-red-600 bg-red-50" },
+    { label: "All", value: stats.total, icon: Plane, tint: "text-primary bg-primary/10", unit: "Trips" },
+    { label: "Pending", value: stats.pending, icon: Clock, tint: "text-amber-600 bg-amber-50", unit: "Trips" },
+    { label: "Verified", value: stats.verified, icon: CheckCircle2, tint: "text-emerald-600 bg-emerald-50", unit: "Trips" },
+    { label: "Rejected", value: stats.rejected, icon: XCircle, tint: "text-red-600 bg-red-50", unit: "Trips" },
+    { label: "Has Passport", value: stats.withPassport, icon: BookCheck, tint: "text-sky-600 bg-sky-50", unit: "People" },
+    { label: "No Passport", value: stats.withoutPassport, icon: BookX, tint: "text-orange-600 bg-orange-50", unit: "People" },
   ];
 
   const pagination = data?.pagination;
@@ -118,7 +124,7 @@ export default function AdminBusinessTripsPage() {
         </div>
 
         {/* Stats */}
-        <div className="mb-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="mb-4 grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-6">
           {statCards.map((card) => (
             <div
               key={card.label}
@@ -129,7 +135,7 @@ export default function AdminBusinessTripsPage() {
                 <p className="mt-1 text-2xl font-semibold tracking-tight">
                   {card.value}
                   <span className="ml-1.5 text-xs font-normal text-muted-foreground">
-                    Trips
+                    {card.unit}
                   </span>
                 </p>
               </div>

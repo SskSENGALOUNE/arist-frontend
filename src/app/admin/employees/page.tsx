@@ -17,6 +17,7 @@ import {
   UserCheck,
   UserX,
   ShieldCheck,
+  MoreVertical,
 } from "lucide-react";
 import {
   employeeService,
@@ -37,6 +38,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { EmployeeFormDialog } from "@/components/employees/employee-form-dialog";
 import { DeleteEmployeeDialog } from "@/components/employees/delete-employee-dialog";
 import { ResetPasswordDialog } from "@/components/employees/reset-password-dialog";
@@ -115,10 +123,27 @@ export default function EmployeesPage() {
   const [resettingEmployee, setResettingEmployee] =
     useState<EmployeeUser | null>(null);
 
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
   const { data, isLoading } = useQuery({
     queryKey: ["employees", params],
     queryFn: () => employeeService.list(params),
   });
+
+  const allIds = data?.items.map((e) => e.id) ?? [];
+  const allSelected = allIds.length > 0 && allIds.every((id) => selectedIds.has(id));
+
+  function toggleAll() {
+    setSelectedIds(allSelected ? new Set() : new Set(allIds));
+  }
+
+  function toggleOne(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
 
   // Stats — dedicated backend endpoint returns accurate counts.
   const { data: statsData } = useQuery({
@@ -291,6 +316,15 @@ export default function EmployeesPage() {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-10">
+                  <input
+                    type="checkbox"
+                    className="size-4 rounded border-border accent-primary"
+                    checked={allSelected}
+                    onChange={toggleAll}
+                    aria-label="Select all"
+                  />
+                </TableHead>
                 <TableHead>{t.employees.name}</TableHead>
                 <TableHead>{t.employees.username}</TableHead>
                 <TableHead>{t.employees.email}</TableHead>
@@ -328,13 +362,13 @@ export default function EmployeesPage() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     {t.common.loading}
                   </TableCell>
                 </TableRow>
               ) : !data?.items.length ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                     {t.employees.noEmployees}
                   </TableCell>
                 </TableRow>
@@ -343,8 +377,18 @@ export default function EmployeesPage() {
                   <TableRow
                     key={emp.id}
                     className="cursor-pointer"
+                    data-selected={selectedIds.has(emp.id)}
                     onClick={() => router.push(`/admin/employees/${emp.id}`)}
                   >
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <input
+                        type="checkbox"
+                        className="size-4 rounded border-border accent-primary"
+                        checked={selectedIds.has(emp.id)}
+                        onChange={() => toggleOne(emp.id)}
+                        aria-label={`Select ${emp.firstName} ${emp.lastName}`}
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-3">
                         <Avatar className="size-8 shrink-0">
@@ -397,45 +441,43 @@ export default function EmployeesPage() {
                         </span>
                       )}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <div
-                        className="flex items-center justify-end gap-1"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <Button
-                          variant="ghost"
-                          size="icon-xs"
-                          title={t.common.edit}
-                          onClick={() => {
-                            setEditingEmployee(emp);
-                            setFormOpen(true);
-                          }}
-                        >
-                          <Pencil className="size-3.5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon-xs"
-                          title={t.common.resetPassword}
-                          onClick={() => {
-                            setResettingEmployee(emp);
-                            setResetOpen(true);
-                          }}
-                        >
-                          <KeyRound className="size-3.5" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon-xs"
-                          title={t.common.delete}
-                          onClick={() => {
-                            setDeletingEmployee(emp);
-                            setDeleteOpen(true);
-                          }}
-                        >
-                          <Trash2 className="size-3.5 text-destructive" />
-                        </Button>
-                      </div>
+                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger className="inline-flex size-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:outline-none">
+                          <MoreVertical className="size-4" />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" side="bottom">
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setEditingEmployee(emp);
+                              setFormOpen(true);
+                            }}
+                          >
+                            <Pencil className="size-3.5" />
+                            {t.common.edit}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setResettingEmployee(emp);
+                              setResetOpen(true);
+                            }}
+                          >
+                            <KeyRound className="size-3.5" />
+                            {t.common.resetPassword}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            variant="destructive"
+                            onClick={() => {
+                              setDeletingEmployee(emp);
+                              setDeleteOpen(true);
+                            }}
+                          >
+                            <Trash2 className="size-3.5" />
+                            {t.common.delete}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 ))

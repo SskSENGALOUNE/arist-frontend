@@ -82,6 +82,10 @@ export interface BusinessTripStats {
   verified: number;
   rejected: number;
   draft: number;
+  passportStats: {
+    withPassport: number;
+    withoutPassport: number;
+  };
 }
 
 export interface DestinationStat {
@@ -106,6 +110,8 @@ export interface ListTopTravelersParams {
   page?: number;
   limit?: number;
   tripType?: TripType;
+  month?: number;
+  year?: number;
 }
 
 export interface PaginatedTravelers {
