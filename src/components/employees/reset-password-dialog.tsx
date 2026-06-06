@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Eye, EyeOff } from "lucide-react";
@@ -51,9 +52,6 @@ export function ResetPasswordDialog({
 }: ResetPasswordDialogProps) {
   const t = useT();
   const [showPassword, setShowPassword] = useState(false);
-  const [feedback, setFeedback] = useState<
-    { kind: "error"; message: string } | null
-  >(null);
 
   const {
     register,
@@ -68,7 +66,6 @@ export function ResetPasswordDialog({
   const handleOpenChange = (next: boolean) => {
     if (!next) {
       reset();
-      setFeedback(null);
       setShowPassword(false);
     }
     onOpenChange(next);
@@ -79,7 +76,6 @@ export function ResetPasswordDialog({
     : "";
 
   const onSubmit = handleSubmit(async (data) => {
-    setFeedback(null);
     try {
       await onConfirm(data.newPassword);
       handleOpenChange(false);
@@ -87,7 +83,7 @@ export function ResetPasswordDialog({
       const message =
         (err as { response?: { data?: { error?: { message?: string } } } })
           ?.response?.data?.error?.message ?? t.resetPasswordDialog.failed;
-      setFeedback({ kind: "error", message });
+      toast.error(message);
     }
   });
 
@@ -101,12 +97,6 @@ export function ResetPasswordDialog({
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="flex flex-col gap-3">
-          {feedback && (
-            <div className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
-              {feedback.message}
-            </div>
-          )}
-
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="newPassword">
               {t.resetPasswordDialog.newPassword}

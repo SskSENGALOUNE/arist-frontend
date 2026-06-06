@@ -7,7 +7,6 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { Separator } from "@/components/ui/separator";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { TopbarUserMenu } from "@/components/admin/topbar-user-menu";
-import { LanguageSwitcher } from "@/components/language-switcher";
 import { Button } from "@/components/ui/button";
 import { Bell } from "lucide-react";
 import { useT } from "@/lib/i18n";
@@ -59,7 +58,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Separator orientation="vertical" className="mr-2 h-4" />
           <AdminHeaderTitle pathname={pathname} />
           <div className="ml-auto flex items-center gap-2">
-            <LanguageSwitcher />
             <Button
               variant="ghost"
               size="icon"

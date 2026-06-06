@@ -188,6 +188,16 @@ export const en = {
     save: "Save settings",
     toastSaved: "Site settings saved",
     toastSaveFailed: "Failed to save settings",
+    systemSection: "System",
+    fieldTimezone: "Timezone",
+    fieldDateFormat: "Date format",
+    appearanceSection: "Appearance",
+    fieldPrimaryColor: "Primary color",
+    primaryColorHint: "Used for buttons, links and main UI elements",
+    primaryColorReset: "Reset color",
+    darkModeLabel: "Dark mode",
+    darkModeHint: "Use dark background (saved for this device only)",
+    livePreview: "Live Preview",
   },
   footer: {
     fallbackText: (year: number) => `© ${year} Arist Employees. All rights reserved.`,
@@ -297,6 +307,11 @@ export const en = {
     noEmployees: "No employees found.",
     pageInfo: (page: number, totalPages: number, total: number) =>
       `Page ${page} of ${totalPages} (${total} total)`,
+    toastCreated: "Employee created",
+    toastUpdated: "Employee updated",
+    toastDeleted: "Employee deleted",
+    toastSaveFailed: "Failed to save employee",
+    toastDeleteFailed: "Failed to delete employee",
   },
   employeeForm: {
     createTitle: "Create Employee",

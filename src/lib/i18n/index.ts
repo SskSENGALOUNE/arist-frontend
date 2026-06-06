@@ -5,7 +5,7 @@ import { lo } from "./messages-lo";
 export type Locale = "en" | "lo";
 
 const STORAGE_KEY = "locale";
-const DEFAULT_LOCALE: Locale = "en";
+const DEFAULT_LOCALE: Locale = "lo";
 
 const messagesMap: Record<Locale, Messages> = { en, lo };
 

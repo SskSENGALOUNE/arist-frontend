@@ -13,7 +13,6 @@ import {
   Users,
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
-import { LanguageSwitcher } from "@/components/language-switcher";
 import { buttonVariants } from "@/components/ui/button";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { buildSocialLinks } from "@/components/social-icons";
@@ -119,7 +118,7 @@ export default function Home() {
       <div
         id="top"
         className="flex min-h-screen flex-col"
-        style={{ background: "#030712", color: "#e2e8f0", fontFamily: "system-ui, sans-serif" }}
+        style={{ background: "#030712", color: "#e2e8f0", fontFamily: "var(--font-noto-sans-lao), system-ui, sans-serif" }}
       >
         <NavBar t={t} />
 
@@ -283,17 +282,6 @@ function NavBar({ t }: { t: T }) {
               </a>
             ))}
           </nav>
-
-          <div
-            style={{
-              width: 1,
-              height: 24,
-              background: "rgba(148,163,184,0.25)",
-              margin: "0 4px",
-            }}
-          />
-
-          <LanguageSwitcher />
 
           <button
             type="button"

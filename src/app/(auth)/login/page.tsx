@@ -9,7 +9,6 @@ import { Eye, EyeOff, Briefcase } from "lucide-react";
 import { authService } from "@/services/auth";
 import { useAuthStore } from "@/stores/auth";
 import { useT } from "@/lib/i18n";
-import { LanguageSwitcher } from "@/components/language-switcher";
 import { useSiteSettings } from "@/hooks/use-site-settings";
 
 type LoginFormValues = {
@@ -29,7 +28,7 @@ const css = `
     padding: 2rem 1.25rem;
     background: #030712;
     color: #e2e8f0;
-    font-family: system-ui, sans-serif;
+    font-family: var(--font-noto-sans-lao), system-ui, sans-serif;
   }
 
   /* ── Animated background ── */
@@ -182,7 +181,7 @@ const css = `
     background: rgba(255,255,255,0.04);
     border: 1px solid rgba(6,182,212,0.15);
     border-radius: 10px;
-    font-family: system-ui, sans-serif;
+    font-family: var(--font-noto-sans-lao), system-ui, sans-serif;
     font-size: 0.9375rem;
     font-weight: 400;
     color: #f1f5f9;
@@ -240,7 +239,7 @@ const css = `
     background: linear-gradient(135deg,#0284c7 0%,#06b6d4 100%);
     color: #fff;
     border: none;
-    font-family: system-ui, sans-serif;
+    font-family: var(--font-noto-sans-lao), system-ui, sans-serif;
     font-size: 0.8125rem;
     font-weight: 600;
     letter-spacing: 0.08em;
@@ -278,7 +277,7 @@ const css = `
     background: rgba(255,255,255,0.04);
     color: #94a3b8;
     border: 1px dashed rgba(6,182,212,0.25);
-    font-family: system-ui, sans-serif;
+    font-family: var(--font-noto-sans-lao), system-ui, sans-serif;
     font-size: 0.75rem;
     font-weight: 500;
     letter-spacing: 0.08em;
@@ -403,7 +402,6 @@ export default function LoginPage() {
                 {site?.brandName?.trim() || t.landing.brand}
               </span>
             </div>
-            <LanguageSwitcher variant="compact" />
           </div>
 
           <div className="ar-form-header">

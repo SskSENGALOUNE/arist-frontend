@@ -18,6 +18,9 @@ export interface SiteSetting {
   instagramUrl: string | null;
   whatsappUrl: string | null;
   linkedinUrl: string | null;
+  timezone: string;
+  dateFormat: string;
+  primaryColor: string | null;
   createdAt: string;
   updatedAt: string;
   updatedBy: string;
@@ -37,4 +40,7 @@ export interface UpdateSiteSettingData {
   instagramUrl?: string | null;
   whatsappUrl?: string | null;
   linkedinUrl?: string | null;
+  timezone?: string;
+  dateFormat?: string;
+  primaryColor?: string | null;
 }

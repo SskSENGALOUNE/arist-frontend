@@ -194,6 +194,16 @@ export const lo: Messages = {
     save: "ບັນທຶກການຕັ້ງຄ່າ",
     toastSaved: "ບັນທຶກການຕັ້ງຄ່າສຳເລັດ",
     toastSaveFailed: "ບໍ່ສາມາດບັນທຶກການຕັ້ງຄ່າໄດ້",
+    systemSection: "ລະບົບ",
+    fieldTimezone: "ໂຊນເວລາ",
+    fieldDateFormat: "ຮູບແບບວັນທີ",
+    appearanceSection: "ການສະແດງຜົນ",
+    fieldPrimaryColor: "ສີຫຼັກ",
+    primaryColorHint: "ສີທີ່ໃຊ້ກັບປຸ່ມ, ລິ້ງ ແລະ ອົງປະກອບຫຼັກ",
+    primaryColorReset: "ຣີເຊັດສີ",
+    darkModeLabel: "ໂໝດມືດ",
+    darkModeHint: "ໃຊ້ພື້ນຫຼັງສີດຳ (ເກັບໄວ້ສຳລັບຜູ້ໃຊ້ນີ້ເທົ່ານັ້ນ)",
+    livePreview: "ພາບຕົວຢ່າງ",
   },
   footer: {
     fallbackText: (year: number) => `© ${year} Arist Employees. ສະຫງວນລິຂະສິດ.`,
@@ -307,6 +317,11 @@ export const lo: Messages = {
     noEmployees: "ບໍ່ພົບພະນັກງານ.",
     pageInfo: (page: number, totalPages: number, total: number) =>
       `ໜ້າ ${page} ຈາກ ${totalPages} (ທັງໝົດ ${total} ລາຍການ)`,
+    toastCreated: "ສ້າງພະນັກງານສຳເລັດ",
+    toastUpdated: "ອັບເດດພະນັກງານສຳເລັດ",
+    toastDeleted: "ລົບພະນັກງານສຳເລັດ",
+    toastSaveFailed: "ບໍ່ສາມາດບັນທຶກຂໍ້ມູນພະນັກງານໄດ້",
+    toastDeleteFailed: "ບໍ່ສາມາດລົບພະນັກງານໄດ້",
   },
   employeeForm: {
     createTitle: "ສ້າງພະນັກງານ",

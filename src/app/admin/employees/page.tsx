@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   Search,
   Plus,
@@ -170,7 +171,9 @@ export default function EmployeesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       queryClient.invalidateQueries({ queryKey: ["employee-stats"] });
+      toast.success(t.employees.toastCreated);
     },
+    onError: () => toast.error(t.employees.toastSaveFailed),
   });
 
   const updateMutation = useMutation({
@@ -179,7 +182,9 @@ export default function EmployeesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       queryClient.invalidateQueries({ queryKey: ["employee-stats"] });
+      toast.success(t.employees.toastUpdated);
     },
+    onError: () => toast.error(t.employees.toastSaveFailed),
   });
 
   const deleteMutation = useMutation({
@@ -187,7 +192,9 @@ export default function EmployeesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       queryClient.invalidateQueries({ queryKey: ["employee-stats"] });
+      toast.success(t.employees.toastDeleted);
     },
+    onError: () => toast.error(t.employees.toastDeleteFailed),
   });
 
   const resetPasswordMutation = useMutation({
@@ -196,7 +203,9 @@ export default function EmployeesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
       queryClient.invalidateQueries({ queryKey: ["employee-stats"] });
+      toast.success(t.resetPasswordDialog.success);
     },
+    onError: () => toast.error(t.resetPasswordDialog.failed),
   });
 
   const handleSearch = () => {

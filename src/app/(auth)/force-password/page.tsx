@@ -19,8 +19,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { LanguageSwitcher } from "@/components/language-switcher";
-
 function buildSchema(t: ReturnType<typeof useT>) {
   return z
     .object({
@@ -124,9 +122,6 @@ export default function ForcePasswordPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/30 p-4">
       <div className="w-full max-w-md">
-        <div className="mb-4 flex justify-end">
-          <LanguageSwitcher variant="compact" />
-        </div>
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">

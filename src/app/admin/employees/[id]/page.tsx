@@ -3,6 +3,7 @@
 import { use, useState } from "react";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { ArrowLeft, Pencil, KeyRound, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
@@ -100,20 +101,26 @@ export default function EmployeeDetailPage({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employee", id] });
       queryClient.invalidateQueries({ queryKey: ["employees"] });
+      toast.success(t.employees.toastUpdated);
     },
+    onError: () => toast.error(t.employees.toastSaveFailed),
   });
 
   const deleteMutation = useMutation({
     mutationFn: () => employeeService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["employees"] });
+      toast.success(t.employees.toastDeleted);
       router.push("/admin/employees");
     },
+    onError: () => toast.error(t.employees.toastDeleteFailed),
   });
 
   const resetPasswordMutation = useMutation({
     mutationFn: (newPassword: string) =>
       employeeService.resetPassword(id, newPassword),
+    onSuccess: () => toast.success(t.resetPasswordDialog.success),
+    onError: () => toast.error(t.resetPasswordDialog.failed),
   });
 
   const employee: EmployeeUser | undefined = data;

@@ -7,7 +7,6 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { Separator } from "@/components/ui/separator";
 import { EmployeeSidebar } from "@/components/employee/employee-sidebar";
 import { TopbarUserMenu } from "@/components/admin/topbar-user-menu";
-import { LanguageSwitcher } from "@/components/language-switcher";
 import { Button } from "@/components/ui/button";
 import { Bell } from "lucide-react";
 import { useT } from "@/lib/i18n";
@@ -57,7 +56,6 @@ export default function EmployeeLayout({ children }: { children: React.ReactNode
           <Separator orientation="vertical" className="mr-2 h-4" />
           <HeaderTitle pathname={pathname} />
           <div className="ml-auto flex items-center gap-2">
-            <LanguageSwitcher />
             <Button
               variant="ghost"
               size="icon"

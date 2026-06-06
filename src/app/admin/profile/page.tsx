@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -161,14 +162,6 @@ export default function ProfilePage() {
 
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
-  const [passwordFeedback, setPasswordFeedback] = useState<{
-    kind: "success" | "error";
-    message: string;
-  } | null>(null);
-  const [profileFeedback, setProfileFeedback] = useState<{
-    kind: "success" | "error";
-    message: string;
-  } | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoUploading, setPhotoUploading] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -228,19 +221,18 @@ export default function ProfilePage() {
   });
 
   const onPasswordSubmit = passwordForm.handleSubmit(async (data) => {
-    setPasswordFeedback(null);
     try {
       await authService.changePassword({
         currentPassword: data.currentPassword,
         newPassword: data.newPassword,
       });
-      setPasswordFeedback({ kind: "success", message: t.profile.passwordUpdated });
+      toast.success(t.profile.passwordUpdated);
       passwordForm.reset();
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { error?: { message?: string } } } })
           ?.response?.data?.error?.message ?? t.profile.passwordFailed;
-      setPasswordFeedback({ kind: "error", message });
+      toast.error(message);
     }
   });
 
@@ -252,15 +244,16 @@ export default function ProfilePage() {
     try {
       await meService.uploadPhoto(file);
       queryClient.invalidateQueries({ queryKey: ["me"] });
+      toast.success(t.profile.profileUpdated);
     } catch {
       setPhotoPreview(null);
+      toast.error(t.profile.profileFailed);
     } finally {
       setPhotoUploading(false);
     }
   };
 
   const onProfileSubmit = profileForm.handleSubmit(async (data) => {
-    setProfileFeedback(null);
     const payload: UpdateProfileData = {};
     if (data.gender) payload.gender = data.gender;
     if (data.educationLevel) payload.educationLevel = data.educationLevel;
@@ -275,12 +268,12 @@ export default function ProfilePage() {
     if (data.passportExpiry) payload.passportExpiry = data.passportExpiry;
     try {
       await profileMutation.mutateAsync(payload);
-      setProfileFeedback({ kind: "success", message: t.profile.profileUpdated });
+      toast.success(t.profile.profileUpdated);
     } catch (err: unknown) {
       const message =
         (err as { response?: { data?: { error?: { message?: string } } } })
           ?.response?.data?.error?.message ?? t.profile.profileFailed;
-      setProfileFeedback({ kind: "error", message });
+      toast.error(message);
     }
   });
 
@@ -392,18 +385,6 @@ export default function ProfilePage() {
           <Card className="shadow-sm">
             <CardContent className="pt-6">
               <form onSubmit={onProfileSubmit} className="space-y-8">
-
-                {profileFeedback && (
-                  <div
-                    className={
-                      profileFeedback.kind === "success"
-                        ? "rounded-lg bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
-                        : "rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive border border-destructive/20"
-                    }
-                  >
-                    {profileFeedback.message}
-                  </div>
-                )}
 
                 {/* Personal */}
                 <div>
@@ -537,18 +518,6 @@ export default function ProfilePage() {
             </CardHeader>
             <CardContent>
               <form onSubmit={onPasswordSubmit} className="space-y-5 max-w-md">
-                {passwordFeedback && (
-                  <div
-                    className={
-                      passwordFeedback.kind === "success"
-                        ? "rounded-lg bg-emerald-500/10 px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
-                        : "rounded-lg bg-destructive/10 px-4 py-3 text-sm text-destructive border border-destructive/20"
-                    }
-                  >
-                    {passwordFeedback.message}
-                  </div>
-                )}
-
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="currentPassword">{t.profile.currentPassword}</Label>
                   <div className="relative">
