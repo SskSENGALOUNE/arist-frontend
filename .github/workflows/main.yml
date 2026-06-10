@@ -12,9 +12,9 @@ jobs:
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.0
         with:
-          host: ${{ secrets.153.75.235.131 }}
-          username: ${{ secrets.root }}
-          password: ${{ secrets.#xTa@3wn }}
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
           script: |
             cd /var/www/frontend
             git pull
