@@ -291,7 +291,27 @@ export default function ProfilePage() {
   const displayName = `${user.firstName} ${user.lastName}`.trim() || user.username;
 
   return (
+<<<<<<< Updated upstream
     <div className="flex flex-1 flex-col gap-6 p-6 max-w-5xl mx-auto w-full">
+=======
+    <div className="flex flex-1 flex-col gap-6 p-6">
+      <div className="flex flex-col gap-2">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={handleBack}
+          className="self-start"
+        >
+          <ArrowLeft className="size-4" />
+          {t.common.backToDashboard}
+        </Button>
+        <h2 className="text-xl font-semibold tracking-tight">
+          {t.profile.title}
+        </h2>
+        <p className="text-sm text-muted-foreground">{t.profile.subtitle}</p>
+      </div>
+>>>>>>> Stashed changes
 
       {/* ── Hero card ── */}
       <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/8 via-background to-background shadow-sm">

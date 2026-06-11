@@ -24,8 +24,8 @@ import {
 import type {
   BusinessTrip,
   ListBusinessTripsParams,
-  TripStatus,
 } from "@/types/business-trip";
+import { TripStatusBadge } from "@/components/business-trips/trip-status-badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -54,19 +54,6 @@ function formatDestination(trip: BusinessTrip): string {
   return trip.destinationCountry
     ? trip.destinationCountry.replace(/_/g, " ")
     : "—";
-}
-
-function statusPillClass(status: TripStatus): string {
-  switch (status) {
-    case "VERIFIED":
-      return "bg-emerald-50 text-emerald-700";
-    case "REJECTED":
-      return "bg-red-50 text-red-700";
-    case "PENDING":
-      return "bg-amber-50 text-amber-700";
-    case "DRAFT":
-      return "bg-muted text-muted-foreground";
-  }
 }
 
 export default function MyBusinessTripsPage() {
@@ -234,14 +221,7 @@ export default function MyBusinessTripsPage() {
                       {format(new Date(trip.returnDate), "yyyy-MM-dd")}
                     </TableCell>
                     <TableCell>
-                      <span
-                        className={cn(
-                          "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                          statusPillClass(trip.status),
-                        )}
-                      >
-                        {trip.status}
-                      </span>
+                      <TripStatusBadge status={trip.status} />
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">

@@ -236,7 +236,7 @@ export default function EmployeeDetailPage({
               {t.employeeDetail.accountInfoDescription}
             </CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-4">
+          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field
               label={t.employeeDetail.username}
               value={employee.username}
@@ -281,7 +281,7 @@ export default function EmployeeDetailPage({
               {t.employeeDetail.hrProfileDescription}
             </CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-4">
+          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field
               label={t.employeeDetail.gender}
               value={

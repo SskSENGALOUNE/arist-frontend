@@ -13,30 +13,15 @@ import {
   User,
 } from "lucide-react";
 import { businessTripService } from "@/services/business-trip";
-import type { BusinessTrip, TripStatus } from "@/types/business-trip";
+import type { BusinessTrip } from "@/types/business-trip";
+import { TripStatusBadge } from "@/components/business-trips/trip-status-badge";
 import { buttonVariants } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-function statusVariant(
-  status: TripStatus,
-): "default" | "outline" | "secondary" | "destructive" {
-  switch (status) {
-    case "VERIFIED":
-      return "default";
-    case "REJECTED":
-      return "destructive";
-    case "DRAFT":
-      return "secondary";
-    case "PENDING":
-      return "outline";
-  }
-}
 
 function formatDestination(trip: BusinessTrip): string {
   if (trip.tripType === "DOMESTIC") {
@@ -119,7 +104,7 @@ export default function AllBusinessTripDetailPage({
         <CardHeader>
           <div className="flex items-start justify-between gap-3">
             <CardTitle className="text-xl">{trip.title}</CardTitle>
-            <Badge variant={statusVariant(trip.status)}>{trip.status}</Badge>
+            <TripStatusBadge status={trip.status} />
           </div>
         </CardHeader>
         <CardContent>

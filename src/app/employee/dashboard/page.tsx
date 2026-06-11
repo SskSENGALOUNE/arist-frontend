@@ -44,7 +44,7 @@ export default function EmployeeDashboardPage() {
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
       <div>
-        <h2 className="text-2xl font-semibold tracking-tight">
+        <h2 className="text-xl font-semibold tracking-tight">
           {t.employeeDashboard.welcome(displayName)}
         </h2>
         <p className="text-sm text-muted-foreground">

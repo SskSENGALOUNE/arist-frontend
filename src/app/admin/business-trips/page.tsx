@@ -19,9 +19,9 @@ import { adminBusinessTripService } from "@/services/business-trip";
 import type {
   BusinessTrip,
   ListBusinessTripsParams,
-  TripStatus,
 } from "@/types/business-trip";
 import { cn } from "@/lib/utils";
+import { TripStatusBadge } from "@/components/business-trips/trip-status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -43,19 +43,6 @@ function formatDestination(trip: BusinessTrip): string {
   return trip.destinationCountry
     ? trip.destinationCountry.replace(/_/g, " ")
     : "—";
-}
-
-function statusPillClass(status: TripStatus): string {
-  switch (status) {
-    case "VERIFIED":
-      return "bg-emerald-50 text-emerald-700";
-    case "REJECTED":
-      return "bg-red-50 text-red-700";
-    case "PENDING":
-      return "bg-amber-50 text-amber-700";
-    case "DRAFT":
-      return "bg-muted text-muted-foreground";
-  }
 }
 
 function employeeName(trip: BusinessTrip): string {
@@ -153,11 +140,11 @@ export default function AdminBusinessTripsPage() {
 
         {/* Toolbar */}
         <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border bg-background p-3 shadow-sm">
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search by employee or title..."
-              className="w-72 pl-8"
+              className="w-full pl-8 sm:w-72"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -233,14 +220,7 @@ export default function AdminBusinessTripsPage() {
                       {format(new Date(trip.returnDate), "yyyy-MM-dd")}
                     </TableCell>
                     <TableCell>
-                      <span
-                        className={cn(
-                          "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                          statusPillClass(trip.status),
-                        )}
-                      >
-                        {trip.status}
-                      </span>
+                      <TripStatusBadge status={trip.status} />
                     </TableCell>
                   </TableRow>
                 ))

@@ -9,8 +9,8 @@ import { businessTripService } from "@/services/business-trip";
 import type {
   BusinessTrip,
   ListBusinessTripsParams,
-  TripStatus,
 } from "@/types/business-trip";
+import { TripStatusBadge } from "@/components/business-trips/trip-status-badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -39,21 +39,6 @@ function formatOwner(trip: BusinessTrip): string {
   return name || trip.user.email;
 }
 
-function statusVariant(
-  status: TripStatus,
-): "default" | "outline" | "secondary" | "destructive" {
-  switch (status) {
-    case "VERIFIED":
-      return "default";
-    case "REJECTED":
-      return "destructive";
-    case "DRAFT":
-      return "secondary";
-    case "PENDING":
-      return "outline";
-  }
-}
-
 export default function AllBusinessTripsPage() {
   const [params, setParams] = useState<ListBusinessTripsParams>({
     page: 1,
@@ -73,7 +58,7 @@ export default function AllBusinessTripsPage() {
     <div className="flex flex-1 flex-col">
       <div className="p-6">
         <div className="mb-4">
-          <h2 className="text-lg font-semibold">All Business Trips</h2>
+          <h2 className="text-xl font-semibold tracking-tight">All Business Trips</h2>
           <p className="text-sm text-muted-foreground">
             View business trips logged by everyone. You can only edit your own
             from &quot;Business Trips&quot;.
@@ -136,9 +121,7 @@ export default function AllBusinessTripsPage() {
                       {format(new Date(trip.returnDate), "yyyy-MM-dd")}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={statusVariant(trip.status)}>
-                        {trip.status}
-                      </Badge>
+                      <TripStatusBadge status={trip.status} />
                     </TableCell>
                     <TableCell className="text-right">
                       <Link

@@ -32,8 +32,15 @@ import { useAuthStore } from "@/stores/auth";
 import { useT, useLocaleStore } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+<<<<<<< Updated upstream
 import { Skeleton } from "@/components/ui/skeleton";
 
+=======
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+
+/** "VIENTIANE_CAPITAL" → "Vientiane Capital" */
+>>>>>>> Stashed changes
 function formatPlace(name: string) {
   return name
     .toLowerCase()
@@ -199,6 +206,7 @@ export default function AdminDashboardPage() {
   };
 
   return (
+<<<<<<< Updated upstream
     <div className="flex flex-1 flex-col gap-5 bg-muted/40 p-6">
       {/* Header */}
       <div className="flex items-start justify-between">
@@ -214,6 +222,14 @@ export default function AdminDashboardPage() {
           <Calendar className="size-3.5" />
           <span>{today}</span>
         </div>
+=======
+    <div className="flex flex-1 flex-col gap-6 bg-muted/40 p-6">
+      <div className="flex flex-col gap-1">
+        <h2 className="text-xl font-semibold tracking-tight">
+          {t.dashboard.welcomeBack(user?.firstName)}
+        </h2>
+        <p className="text-sm text-muted-foreground">{t.dashboard.overview}</p>
+>>>>>>> Stashed changes
       </div>
 
       {/* Stat cards */}

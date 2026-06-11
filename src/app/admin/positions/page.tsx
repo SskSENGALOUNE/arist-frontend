@@ -170,11 +170,11 @@ export default function PositionsPage() {
 
         {/* Toolbar */}
         <div className="mb-4 flex flex-wrap items-center gap-2 rounded-xl border bg-background p-3 shadow-sm">
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder={t.positions.searchPlaceholder}
-              className="w-72 pl-8"
+              className="w-full pl-8 sm:w-72"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />

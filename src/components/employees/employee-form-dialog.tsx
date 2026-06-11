@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useQuery } from "@tanstack/react-query";
@@ -29,7 +29,9 @@ function buildSchemas(t: ReturnType<typeof useT>) {
     firstName: z.string().min(1, t.employeeForm.firstNameRequired),
     lastName: z.string().min(1, t.employeeForm.lastNameRequired),
     role: z.enum(["ADMIN", "EMPLOYEE"]),
-    gender: z.enum(["MALE", "FEMALE"], { message: t.employeeForm.genderRequired }),
+    gender: z
+      .union([z.literal(""), z.enum(["MALE", "FEMALE"])])
+      .refine((v) => v !== "", { message: t.employeeForm.genderRequired }),
     departmentId: z.string().optional(),
     positionId: z.string().optional(),
   });
@@ -54,7 +56,11 @@ type CreateFormValues = {
   firstName: string;
   lastName: string;
   role: "ADMIN" | "EMPLOYEE";
+<<<<<<< Updated upstream
   gender: "MALE" | "FEMALE";
+=======
+  gender: Gender | "";
+>>>>>>> Stashed changes
   departmentId?: string;
   positionId?: string;
 };
@@ -144,9 +150,24 @@ export function EmployeeFormDialog({
     }
   }, [employee, open]);
 
+<<<<<<< Updated upstream
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const form = (isEdit ? editForm : createForm) as ReturnType<typeof useForm<any>>;
+=======
+  // Fields shared by both create and edit forms. Create-only fields
+  // (username/password/gender) and edit-only fields (isActive) are accessed
+  // through createForm/editForm directly below.
+  const form = (isEdit ? editForm : createForm) as unknown as UseFormReturn<{
+    email: string;
+    firstName: string;
+    lastName: string;
+    role: "ADMIN" | "EMPLOYEE";
+    departmentId?: string;
+    positionId?: string;
+  }>;
+>>>>>>> Stashed changes
   const { formState: { errors, isSubmitting } } = form;
+  const createErrors = createForm.formState.errors;
 
   const handleSubmit = form.handleSubmit(async (data) => {
     const payload = {
@@ -179,12 +200,12 @@ export function EmployeeFormDialog({
               <Label htmlFor="username">{t.employeeForm.username}</Label>
               <Input
                 id="username"
-                aria-invalid={!!errors.username}
+                aria-invalid={!!createErrors.username}
                 {...createForm.register("username")}
               />
-              {errors.username && (
+              {createErrors.username && (
                 <p className="text-xs text-destructive">
-                  {errors.username.message as string}
+                  {createErrors.username.message as string}
                 </p>
               )}
             </div>

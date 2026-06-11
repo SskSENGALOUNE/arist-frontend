@@ -110,8 +110,51 @@ Server state (lists, detail pages) lives in **React Query** (`useQuery` / `useMu
 
 - Add `"use client"` at the top of any component that uses hooks, events, or browser APIs.
 - UI primitives live in `components/ui/` — these are **shadcn/ui** components; do not modify them manually. Re-generate with `npx shadcn add <component>`.
+- **Always use the `components/ui/` primitives** — `<Button>`, `<Input>`, `<Table>`, `<Badge>`, `<Card>`, etc. Never write a raw `<button>`, `<table>`, or hand-rolled input for anything that *looks like* a standard control. Raw `<button type="button">` is acceptable only for bespoke interactive elements the primitives don't cover (tab triggers, password-visibility eye toggles, sortable table headers, avatar-upload overlays).
 - Feature dialogs follow the pattern: open state in parent → pass `open` + `onOpenChange` + `onSuccess` props.
 - Skeletons live alongside the feature components (`page-skeletons.tsx`) — add one for every new list/detail page.
+
+### Canonical page anatomy
+
+**`src/app/admin/departments/page.tsx` is the reference implementation** for list pages. Every new admin/employee page must follow its structure:
+
+```tsx
+<div className="flex flex-1 flex-col bg-muted/40">
+  <div className="p-6">
+    {/* 1. Heading: title + subtitle left, primary action right */}
+    <div className="mb-5 flex items-start justify-between gap-3">
+      <div>
+        <h2 className="text-xl font-semibold tracking-tight">{t.feature.heading}</h2>
+        <p className="text-sm text-muted-foreground">{t.feature.subheading}</p>
+      </div>
+      <Button size="sm"><Plus className="size-4" />{t.feature.add}</Button>
+    </div>
+
+    {/* 2. Stat cards: rounded-xl border bg-background p-4 shadow-sm */}
+    {/* 3. Toolbar (search/filters): rounded-xl border bg-background p-3 shadow-sm */}
+    {/* 4. Data table: <Table> from components/ui/table inside the same card style */}
+  </div>
+</div>
+```
+
+Fixed type scale — do not invent new sizes:
+- Page title: `text-xl font-semibold tracking-tight`
+- Stat-card value: `text-2xl font-semibold tracking-tight`
+- Subtitles / helper text: `text-sm text-muted-foreground`
+
+### Status badges
+
+Status → color mappings must come from **one shared component per domain**, not a per-page `switch`. The reference is `components/business-trips/trip-status-badge.tsx` (`<TripStatusBadge status={...} />`) — use it for trip statuses and follow the same shape for any new status-bearing domain. Palette: `bg-emerald-50 text-emerald-700` (verified), `bg-red-50 text-red-700` (rejected), `bg-amber-50 text-amber-700` (pending), `bg-muted text-muted-foreground` (draft).
+
+### User feedback (toasts vs alerts)
+
+- Mutation success/failure → **sonner toast** (`toast.success(...)` / `toast.error(...)`). This is the default everywhere.
+- Inline `<Alert>` is reserved for form-level validation errors on auth pages only.
+
+### Loading states
+
+- Server-routable pages get a `loading.tsx` that renders the matching skeleton from `page-skeletons.tsx` (the employee/business-trips routes are the reference).
+- Client-side fetch states inside a mounted page use `<Skeleton>` blocks that mirror the final layout — never a spinner or bare "Loading..." text.
 
 ### Forms
 
@@ -127,9 +170,19 @@ Use `<Controller>` for non-native inputs (Select, DatePicker, etc.). Read `form.
 ### Styling
 
 - Use **Tailwind CSS** utility classes exclusively — no custom CSS except in `globals.css`.
+- **No inline `style={{...}}` and no hard-coded hex colors** (`#0ea5e9` etc.). Use Tailwind theme tokens (`bg-primary`, `text-muted-foreground`, `bg-sky-500`, ...). If a color isn't in the theme, add it to the theme — don't inline it.
 - Use the `cn()` helper (`lib/utils.ts`) for conditional class merging.
 - Use `cva` (class-variance-authority) when a component needs multiple visual variants.
 - Icons are always from **lucide-react** — sized via the `size` prop.
+
+### Known UI debt — migrate as you touch
+
+These predate the conventions above. **Do not copy patterns from them.** When you edit one of them for any reason, also bring the parts you touch up to the canonical pattern:
+
+- `app/(auth)/login/page.tsx` — bespoke design built with an embedded CSS string and hex colors. Converting it to Tailwind is a deliberate design pass, not a drive-by fix; until then it is exempt from the styling rules but must not be used as a reference. (The landing page `app/page.tsx` has already been converted — its keyframes live at the bottom of `globals.css`.)
+- All `business-trips` pages hard-code English strings instead of `useT()` — the whole feature needs i18n keys added to both message files.
+
+Inline `style={{ width: \`${pct}%\` }}` for computed values (progress bars, chart widths) is fine — the no-inline-style rule applies to static styling only.
 
 ### i18n
 
