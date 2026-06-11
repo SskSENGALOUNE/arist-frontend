@@ -11,18 +11,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ALargeSmall, Eye, Globe, Mail, MapPin, Moon, Paintbrush, Phone, Sun, ImageIcon, Loader2, Plus, Trash2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
-<<<<<<< Updated upstream
 import { useSettingsStore, FONT_SIZE_PX, type FontSize } from "@/stores/settings";
 import { applyPrimaryColor } from "@/components/html-lang-sync";
 import { buildSocialLinks } from "@/components/social-icons";
 import { cn } from "@/lib/utils";
-import {
-  adminSiteSettingService,
-  siteSettingService,
-} from "@/services/site-setting";
-=======
 import { adminSiteSettingService } from "@/services/site-setting";
->>>>>>> Stashed changes
 import { SITE_SETTINGS_QUERY_KEY } from "@/hooks/use-site-settings";
 import type { UpdateSiteSettingData } from "@/types/site-setting";
 import { useT } from "@/lib/i18n";

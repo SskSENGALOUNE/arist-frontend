@@ -15,11 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
-<<<<<<< Updated upstream
-import { buttonVariants } from "@/components/ui/button";
-=======
 import { LanguageSwitcher } from "@/components/language-switcher";
->>>>>>> Stashed changes
 import { useSiteSettings } from "@/hooks/use-site-settings";
 import { buildSocialLinks } from "@/components/social-icons";
 import { cn } from "@/lib/utils";
@@ -65,22 +61,11 @@ export default function Home() {
   ];
 
   return (
-<<<<<<< Updated upstream
-    <>
-      <style>{KEYFRAMES}</style>
-      <div
-        id="top"
-        className="flex min-h-screen flex-col"
-        style={{ background: "#030712", color: "#e2e8f0", fontFamily: "var(--font-noto-sans-lao), system-ui, sans-serif" }}
-      >
-        <NavBar t={t} />
-=======
     <div
       id="top"
       className="flex min-h-screen flex-col bg-gray-950 text-slate-200 [font-family:system-ui,sans-serif]"
     >
       <NavBar t={t} />
->>>>>>> Stashed changes
 
       <main className="flex flex-1 flex-col">
         <HeroSection t={t} />
@@ -183,13 +168,10 @@ function NavBar({ t }: { t: T }) {
             ))}
           </nav>
 
-<<<<<<< Updated upstream
-=======
           <div className="mx-1 hidden h-6 w-px bg-slate-400/25 lg:block" />
 
           <LanguageSwitcher />
 
->>>>>>> Stashed changes
           <button
             type="button"
             aria-label={t.landing.searchLabel}

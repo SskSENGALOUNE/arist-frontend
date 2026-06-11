@@ -20,6 +20,7 @@ import type { EmployeeUser } from "@/services/employee";
 import { departmentService } from "@/services/department";
 import { positionService } from "@/services/position";
 import { useT } from "@/lib/i18n";
+import type { Gender } from "@/types";
 
 function buildSchemas(t: ReturnType<typeof useT>) {
   const createSchema = z.object({
@@ -56,11 +57,7 @@ type CreateFormValues = {
   firstName: string;
   lastName: string;
   role: "ADMIN" | "EMPLOYEE";
-<<<<<<< Updated upstream
-  gender: "MALE" | "FEMALE";
-=======
   gender: Gender | "";
->>>>>>> Stashed changes
   departmentId?: string;
   positionId?: string;
 };
@@ -150,10 +147,6 @@ export function EmployeeFormDialog({
     }
   }, [employee, open]);
 
-<<<<<<< Updated upstream
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const form = (isEdit ? editForm : createForm) as ReturnType<typeof useForm<any>>;
-=======
   // Fields shared by both create and edit forms. Create-only fields
   // (username/password/gender) and edit-only fields (isActive) are accessed
   // through createForm/editForm directly below.
@@ -165,7 +158,6 @@ export function EmployeeFormDialog({
     departmentId?: string;
     positionId?: string;
   }>;
->>>>>>> Stashed changes
   const { formState: { errors, isSubmitting } } = form;
   const createErrors = createForm.formState.errors;
 

@@ -20,21 +20,11 @@ import {
   Timer,
 } from "lucide-react";
 import { adminBusinessTripService } from "@/services/business-trip";
-import type { BusinessTrip } from "@/types/business-trip";
-import { TripStatusBadge } from "@/components/business-trips/trip-status-badge";
+import type { BusinessTrip, TripStatus } from "@/types/business-trip";
 import { Button, buttonVariants } from "@/components/ui/button";
-<<<<<<< Updated upstream
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-=======
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
->>>>>>> Stashed changes
 import {
   Dialog,
   DialogContent,
@@ -47,7 +37,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
-<<<<<<< Updated upstream
 function statusConfig(status: TripStatus) {
   switch (status) {
     case "VERIFIED":
@@ -89,8 +78,6 @@ function statusConfig(status: TripStatus) {
   }
 }
 
-=======
->>>>>>> Stashed changes
 function formatDestination(trip: BusinessTrip): string {
   if (trip.tripType === "DOMESTIC") {
     return trip.destinationProvince
@@ -254,7 +241,6 @@ export default function AdminBusinessTripDetailPage({
         )}
       </div>
 
-<<<<<<< Updated upstream
       <div className="grid gap-4 lg:grid-cols-3">
         {/* Left column: Hero + Employee */}
         <div className="flex flex-col gap-4 lg:col-span-2">
@@ -334,22 +320,6 @@ export default function AdminBusinessTripDetailPage({
                 <DetailItem
                   icon={<User className="size-4" />}
                   label="Full Name"
-=======
-      <Card className="max-w-2xl">
-        <CardHeader>
-          <div className="flex items-start justify-between gap-3">
-            <CardTitle className="text-xl">{trip.title}</CardTitle>
-            <TripStatusBadge status={trip.status} />
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="divide-y">
-            {trip.user && (
-              <>
-                <InfoRow
-                  label="Employee"
-                  icon={<User className="size-3.5" />}
->>>>>>> Stashed changes
                   value={`${trip.user.firstName} ${trip.user.lastName}`.trim()}
                 />
                 <DetailItem

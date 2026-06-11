@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,6 +13,7 @@ import {
 } from "@tanstack/react-query";
 import {
   ALargeSmall,
+  ArrowLeft,
   Camera,
   Eye,
   EyeOff,
@@ -147,6 +149,7 @@ function SectionHeader({
 }
 
 export default function ProfilePage() {
+  const router = useRouter();
   const storedUser = useAuthStore((s) => s.user);
   const t = useT();
   const queryClient = useQueryClient();
@@ -289,11 +292,9 @@ export default function ProfilePage() {
 
   const initials = getInitials(user.firstName, user.lastName, user.username);
   const displayName = `${user.firstName} ${user.lastName}`.trim() || user.username;
+  const handleBack = () => router.push("/admin/dashboard");
 
   return (
-<<<<<<< Updated upstream
-    <div className="flex flex-1 flex-col gap-6 p-6 max-w-5xl mx-auto w-full">
-=======
     <div className="flex flex-1 flex-col gap-6 p-6">
       <div className="flex flex-col gap-2">
         <Button
@@ -311,7 +312,6 @@ export default function ProfilePage() {
         </h2>
         <p className="text-sm text-muted-foreground">{t.profile.subtitle}</p>
       </div>
->>>>>>> Stashed changes
 
       {/* ── Hero card ── */}
       <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/8 via-background to-background shadow-sm">

@@ -32,15 +32,9 @@ import { useAuthStore } from "@/stores/auth";
 import { useT, useLocaleStore } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-<<<<<<< Updated upstream
-import { Skeleton } from "@/components/ui/skeleton";
-
-=======
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /** "VIENTIANE_CAPITAL" → "Vientiane Capital" */
->>>>>>> Stashed changes
 function formatPlace(name: string) {
   return name
     .toLowerCase()
@@ -154,11 +148,6 @@ export default function AdminDashboardPage() {
         .filter((d) => d.value > 0)
     : [];
 
-  const today = new Date().toLocaleDateString(
-    locale === "lo" ? "lo-LA" : "en-US",
-    { weekday: "long", year: "numeric", month: "long", day: "numeric" },
-  );
-
   const statCards = [
     {
       label: t.dashboard.totalEmployees,
@@ -206,30 +195,12 @@ export default function AdminDashboardPage() {
   };
 
   return (
-<<<<<<< Updated upstream
-    <div className="flex flex-1 flex-col gap-5 bg-muted/40 p-6">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">
-            {t.dashboard.welcomeBack(user?.firstName)}!
-          </h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            {t.dashboard.overview}
-          </p>
-        </div>
-        <div className="flex items-center gap-2 rounded-full border bg-background px-3.5 py-1.5 text-sm text-muted-foreground shadow-sm">
-          <Calendar className="size-3.5" />
-          <span>{today}</span>
-        </div>
-=======
     <div className="flex flex-1 flex-col gap-6 bg-muted/40 p-6">
       <div className="flex flex-col gap-1">
         <h2 className="text-xl font-semibold tracking-tight">
           {t.dashboard.welcomeBack(user?.firstName)}
         </h2>
         <p className="text-sm text-muted-foreground">{t.dashboard.overview}</p>
->>>>>>> Stashed changes
       </div>
 
       {/* Stat cards */}
